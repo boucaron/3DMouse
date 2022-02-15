@@ -38,6 +38,14 @@ Inspired by the great work made by https://github.com/FaqT0tum/Orbion_Space_Mous
 
 ![](CAD/Images/ToleranceMB.PNG)
 
+## Assembly
+1) Put on the 3D Printed Base the Joystick and screw 4 M3 by 6mm on it
+2) Put the Encoder on the 3D Printed Joystick/Encoder Plate and screw 2 M3 by 6MM on it
+3) Put the 3D Printed Button on the Encoder
+4) Put the Arduino in the base as shown in the previous image
+5) Put the wires (TODO: schematic)
+6) Compile and Upload the firmware
+
 
 ## Firmware 
 - Regular Arduino Env using standard libraries + Encoder library (provided in Arduino IDE): compile and upload
