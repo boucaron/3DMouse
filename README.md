@@ -27,8 +27,11 @@ Inspired by the great work made by https://github.com/FaqT0tum/Orbion_Space_Mous
 - The tolerances for the holes are fully customizable inside the provided FreeCAD files, each printer/filament is different. Try to use the same filament roll when 3D printing those parts to prevent additional iterations due to tolerance changes.
 
 1) Start by first printing the custom Encoder/Joystick base (less than 1 hour in 0.2mm) to setup your baseline for Tolerances for the M3 holes and the **critical tolerance** to the Joystick pin (not too tight, but no play). Orientation is upside down to finish the Joystick pin hole: you will have few supports to remove. Then update accordingly the FreeCAD/STL file for the tolerance.
+![](CAD/Images/ToleranceJE.PNG)
 2) For the Encoder button you will have to perform the same step for the tolerance (a bit more than 1 hour to print in 0.2mm).
+![](CAD/Images/ToleranceB.PNG)
 3) Finally the base using the tolerance for M3 holes you put in the first step.
+![](CAD/Images/ToleranceMB.PNG)
 
 
 ## Firmware 
