@@ -21,6 +21,7 @@ Inspired by the great work made by https://github.com/FaqT0tum/Orbion_Space_Mous
 
 ## CAD/3D Printed Parts
 - It is a test bed: a base to integrate the Joystick + Arduino, a custom button on top of the Encoder and a custom Encoder/Joystick base.
+![](CAD/Images/3DMouse.png)
 
 ### 3D Printing Steps
 - The tolerances for the holes are fully customizable inside the provided FreeCAD files, each printer/filament is different. Try to use the same filament roll when 3D printing those parts to prevent additional iterations due to tolerance changes.
