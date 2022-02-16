@@ -27,7 +27,7 @@ long positionEnc  = -999;
 
 
 
-void freecadConfiguration();
+void freecadConfiguration(bool);
 void basicMouseConfiguration();
 
 
@@ -203,6 +203,27 @@ struct MouseConf {
     Delay += delay0;
   }
 
+  bool releasedMouseButton(const MouseKeyHID  &in, byte state, byte mouseButton) {
+    if ( in.mouseEnabled && in.mouseButton == mouseButton && state != 0 ) {
+      return false;
+    }
+    return true;
+  }
+
+  void checkAndReleaseMouseButton(byte mouseButton, const MouseState &state ) {
+    if ( releasedMouseButton(UpX, state.UpX, mouseButton) &&
+         releasedMouseButton(DownX, state.DownX, mouseButton) &&
+         releasedMouseButton(UpY, state.UpY, mouseButton) &&
+         releasedMouseButton(DownY, state.DownY, mouseButton) &&
+         releasedMouseButton(UpZ, state.UpZ, mouseButton) &&
+         releasedMouseButton(DownZ, state.DownZ, mouseButton) && 
+         releasedMouseButton(ButtonZ, state.ButtonZ, mouseButton) &&
+         releasedMouseButton(RotateZ, state.RotateZ, mouseButton) 
+         ) {
+      Mouse.release(mouseButton);
+         }
+  }
+
   void writeHID(const MouseState &state) {
     UpX.writeHID(state.UpX, state.XSens, state.YSens); 
     DownX.writeHID(state.DownX, state.XSens, state.YSens);
@@ -210,7 +231,10 @@ struct MouseConf {
     DownY.writeHID(state.DownY, state.XSens, state.YSens);
     UpZ.writeHID(state.UpZ, state.XSens, state.YSens); 
     DownZ.writeHID(state.DownZ, state.XSens, state.YSens);
-
+    
+    checkAndReleaseMouseButton(MOUSE_LEFT, state);
+    checkAndReleaseMouseButton(MOUSE_RIGHT, state);
+    checkAndReleaseMouseButton(MOUSE_MIDDLE, state);
     
     ButtonZ.writeHID(state.ButtonZ, state.XSens, state.YSens);
     
@@ -218,9 +242,9 @@ struct MouseConf {
       // Debounce
       if ( state.ButtonZ != 0 ) {
         delay(150);
-      } else {
+   /*   } else {
          Mouse.release(ButtonZ.mouseButton);
-      }
+      } */
     } 
     RotateZ.writeHID(state.RotateZ, state.XSens, state.YSens);
 
@@ -232,6 +256,7 @@ struct MouseConf {
       }
     }         
     
+    }
   }
 };
 
@@ -266,7 +291,8 @@ void helpCommand() {
   Serial.println("R: read mouse configuration");
   Serial.println("T: dummy test mouse move");
   Serial.println("t: dummy test keyboard type");
-  Serial.println("f: FreeCAD Mouse Configuration");
+  Serial.println("f: FreeCAD Translate Mouse Configuration");
+  Serial.println("F: FreeCAD Rotate Mouse Configuration");
   Serial.println("m: Basic Mouse Configuration");
 }
 
@@ -300,8 +326,11 @@ void readSerialPort() {
       case 't':
         keyboardTest();
         break;
-      case 'f':
-        freecadConfiguration();
+      case 'f': // Translate
+        freecadConfiguration(false);
+        break;
+      case 'F': // Rotate
+        freecadConfiguration(true);
         break;
       case 'm':
         basicMouseConfiguration();
@@ -417,24 +446,27 @@ void keyboardTest() {
 // FreeCAD mouse test : CAD Mode
 // Translate: Hold Middle Button, Move, Then Release when back on center
 // Rotate: Hold Middle and Left Button, Move, Then Release when back on center
-void freecadConfiguration() {
+void freecadConfiguration(bool rotate) {
 
  mouseState.reset();
-  
-  
+ byte rotationLeftButton = 0;
+ if ( rotate != false )  {
+    rotate = MOUSE_LEFT;   
+ }
+   
   mouseConf.UpX.mouseEnabled = 1;
   mouseConf.UpX.xAxis = 1;
   mouseConf.UpX.yAxis = 0;
   mouseConf.UpX.wheel = 0;
   mouseConf.UpX.keyboardEnabled = 0;  
-  mouseConf.UpX.mouseButton =  MOUSE_MIDDLE;
+  mouseConf.UpX.mouseButton =  MOUSE_MIDDLE | rotate;
 
   mouseConf.DownX.mouseEnabled = 1;
   mouseConf.DownX.xAxis = -1;
   mouseConf.DownX.yAxis = 0;
   mouseConf.DownX.wheel = 0;
   mouseConf.DownX.keyboardEnabled = 0;  
-  mouseConf.DownX.mouseButton =  MOUSE_MIDDLE;
+  mouseConf.DownX.mouseButton =  MOUSE_MIDDLE | rotate;
 
 
   mouseConf.UpY.mouseEnabled = 1;
@@ -442,14 +474,14 @@ void freecadConfiguration() {
   mouseConf.UpY.yAxis = -1;
   mouseConf.UpY.wheel = 0;
   mouseConf.UpY.keyboardEnabled = 0;  
-  mouseConf.UpY.mouseButton =  MOUSE_MIDDLE;
+  mouseConf.UpY.mouseButton =  MOUSE_MIDDLE | rotate;
 
   mouseConf.DownY.mouseEnabled = 1;
   mouseConf.DownY.xAxis = 0;
   mouseConf.DownY.yAxis = 1;
   mouseConf.DownY.wheel = 0;
   mouseConf.DownY.keyboardEnabled = 0;  
-  mouseConf.DownY.mouseButton =   MOUSE_MIDDLE;
+  mouseConf.DownY.mouseButton =   MOUSE_MIDDLE | rotate;
 
   mouseConf.ButtonZ.mouseEnabled = 1;
   mouseConf.ButtonZ.xAxis = 0;
