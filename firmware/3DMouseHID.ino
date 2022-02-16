@@ -213,10 +213,15 @@ struct MouseConf {
 
     
     ButtonZ.writeHID(state.ButtonZ, state.XSens, state.YSens);
-    // Debounce
-    if ( state.ButtonZ != 0 && ButtonZ.mouseEnabled &&  ButtonZ.mouseButton != 0 ) {
-      delay(150);
-    }
+    
+    if (  ButtonZ.mouseEnabled &&  ButtonZ.mouseButton != 0 ) {
+      // Debounce
+      if ( state.ButtonZ != 0 ) {
+        delay(150);
+      } else {
+         Mouse.release(ButtonZ.mouseButton);
+      }
+    } 
     RotateZ.writeHID(state.RotateZ, state.XSens, state.YSens);
 
 
@@ -372,12 +377,12 @@ void readMouse() {
 
 void writeHID() {
   mouseConf.writeHID(mouseState);
-  // delay(mouseConf.delay);
-
+ 
+/*
   Keyboard.releaseAll();
   Mouse.release(MOUSE_LEFT);
   Mouse.release(MOUSE_RIGHT);
-  Mouse.release(MOUSE_MIDDLE);
+  Mouse.release(MOUSE_MIDDLE); */
   
 }
 
