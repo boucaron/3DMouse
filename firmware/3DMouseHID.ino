@@ -31,63 +31,108 @@ void freecadConfiguration(bool);
 void basicMouseConfiguration();
 
 
-/** Sent message */
-struct MouseKeyHID {
-  uint8_t keyboardEnabled;
-  uint8_t  keyboardCode;
-  uint16_t keyboardMod;
 
-  uint8_t mouseEnabled;
+enum MouseKeyHIDMode {
+  NOTSET,
+  KEYBOARD_PRESS,
+  KEYBOARD_RELEASE,
+  MOUSE_PRESS,
+  MOUSE_RELEASE
+};
+
+struct MouseHIDData {
   uint8_t mouseButton;
   int8_t xAxis, yAxis, wheel;
- 
+};
+
+struct KeyHIDData {
+  uint8_t keyboardCode;
+};
+
+union HIDData {
+  MouseHIDData mouse;
+  KeyHIDData keyboard;
+};
+
+
+/** Sent message */
+struct MouseKeyHID {
+  MouseKeyHIDMode mode;
+  HIDData data;
+  
 
 
   void print() {
     Serial.print("<<");
-    Serial.print(keyboardEnabled); Serial.print(":");
-    Serial.print(keyboardCode); Serial.print(":");
-    Serial.print(keyboardMod); Serial.print(":");
-    Serial.print(mouseEnabled); Serial.print(":");
-    Serial.print(mouseButton); Serial.print(":");
-    Serial.print(xAxis); Serial.print(":");
-    Serial.print(yAxis); Serial.print(":");
-    Serial.print(wheel);  Serial.print(":");
+    switch (mode) {
+       case NOTSET: Serial.print("NOTSET"); break;
+       case KEYBOARD_PRESS: Serial.print("KEYBOARD_PRESS"); break;
+       case KEYBOARD_RELEASE: Serial.print("KEYBOARD_RELEASE"); break;
+       case MOUSE_PRESS: Serial.print("MOUSE_PRESS"); break;
+       case MOUSE_RELEASE: Serial.print("MOUSE_RELEASE"); break;
+       default: Serial.print("Unknown mode!"); break;
+    }
+    Serial.print(":");
+    if ( mode == KEYBOARD_PRESS || mode == KEYBOARD_RELEASE ) {
+      Serial.print(data.keyboard.keyboardCode); Serial.print(":");     
+    }
+    else if ( mode == MOUSE_PRESS || mode == MOUSE_RELEASE ) {
+     Serial.print(data.mouse.mouseButton); Serial.print(":");
+     Serial.print(data.mouse.xAxis); Serial.print(":");
+     Serial.print(data.mouse.yAxis); Serial.print(":");
+     Serial.print(data.mouse.wheel);  Serial.print(":");
+    }
     Serial.println(">>");
   }
 
   void read() {
-    keyboardEnabled = Serial.read();
-    keyboardCode = Serial.read();
-    uint8_t keyboardMod0 = Serial.read();
-    uint8_t keyboardMod1 = Serial.read();
-    keyboardMod = keyboardMod1;
-    keyboardMod << 8;
-    keyboardMod += keyboardMod0;
-
-    mouseEnabled = Serial.read();
-    mouseButton = Serial.read();
-    xAxis = Serial.read();
-    yAxis = Serial.read();
-    wheel = Serial.read();
-
+    int mmode = Serial.parseInt();
+    switch ( mmode ) {
+      case 0: mode = NOTSET; break;
+      case 1: mode = KEYBOARD_PRESS; break;
+      case 2: mode = KEYBOARD_RELEASE; break;
+      case 3: mode = MOUSE_PRESS; break;
+      case 4: mode = MOUSE_RELEASE; break;
+      default: Serial.print("Unknown mode!"); break;
+  }
+    if ( mode == KEYBOARD_PRESS || mode == KEYBOARD_RELEASE ) {
+      data.keyboard.keyboardCode = Serial.parseInt();
+    } else if ( mode == MOUSE_PRESS || mode == MOUSE_RELEASE ) {
+      data.mouse.mouseButton = Serial.parseInt();
+      data.mouse.xAxis = Serial.parseInt();
+      data.mouse.yAxis = Serial.parseInt();
+      data.mouse.wheel = Serial.parseInt();
+    }    
   }
 
   void writeHID(byte up, int XSens, int YSens) {
     if ( up != 0 ) {
-      if ( keyboardEnabled != 0 ) {       
-// TODO        
+      switch ( mode ) {       
+        case KEYBOARD_PRESS:
+          Keyboard.press(data.keyboard.keyboardCode); 
+          break;
+        case KEYBOARD_RELEASE:
+          Keyboard.release(data.keyboard.keyboardCode); 
+          break;
+        case MOUSE_PRESS: 
+          if ( data.mouse.mouseButton != 0 ) {
+              Mouse.press(data.mouse.mouseButton);
+          }
+          Mouse.move(data.mouse.xAxis * XSens, data.mouse.yAxis * YSens, data.mouse.wheel);
+          break;
+        case MOUSE_RELEASE:
+          if ( data.mouse.mouseButton != 0 ) {
+            Mouse.release(data.mouse.mouseButton);
+          }
+          Mouse.move(data.mouse.xAxis * XSens, data.mouse.yAxis * YSens, data.mouse.wheel);
+          break;
       }
-      if ( mouseEnabled != 0 ) {
-        Mouse.press(mouseButton);
-        Mouse.move(xAxis * XSens, yAxis * YSens, wheel);
-      }
+     
     }
   }
 
   void reset() {
-    keyboardEnabled = 0;
-    mouseEnabled = 0;
+    mode = NOTSET;
   }
 
 
@@ -204,8 +249,10 @@ struct MouseConf {
   }
 
   bool releasedMouseButton(const MouseKeyHID  &in, byte state, byte mouseButton) {
-    if ( in.mouseEnabled && ( (in.mouseButton & mouseButton) == mouseButton ) && state != 0 ) {
-      return false;
+    if ( in.mode == MOUSE_PRESS || in.mode == MOUSE_RELEASE ) {
+      if ( ((in.data.mouse.mouseButton & mouseButton) == mouseButton ) && state != 0 ) {
+        return false;
+      }
     }
     return true;
   }
@@ -253,7 +300,7 @@ struct MouseConf {
     
     ButtonZ.writeHID(state.ButtonZ, state.XSens, state.YSens);
     
-    if (  ButtonZ.mouseEnabled &&  ButtonZ.mouseButton != 0 ) {
+    if (  ButtonZ.mode == MOUSE_PRESS &&  ButtonZ.data.mouse.mouseButton != 0 ) {
       // Debounce
       if ( state.ButtonZ != 0 ) {
         delay(150);
@@ -437,14 +484,11 @@ void writeHID() {
 void mouseTest() {
   mouseState.reset();
   mouseState.UpX = 1;
-  long a = mouseConf.UpX.mouseEnabled;
-  long b = mouseConf.UpX.xAxis;
-  mouseConf.UpX.mouseEnabled = 1;
-  mouseConf.UpX.xAxis = 100;
+  mouseConf.UpX.mode = MOUSE_PRESS;  
+  mouseConf.UpX.data.mouse.mouseButton = 0;
+  mouseConf.UpX.data.mouse.xAxis = 100;
   writeHID();
-  mouseConf.UpX.mouseEnabled = a;
-  mouseConf.UpX.xAxis = b;
-
+  
   Serial.println("mouseTest()");
 }
 
@@ -472,41 +516,36 @@ void freecadConfiguration(bool rotate) {
     rotateB = MOUSE_LEFT;   
  } 
    
-  mouseConf.UpX.mouseEnabled = 1;
-  mouseConf.UpX.xAxis = 1;
-  mouseConf.UpX.yAxis = 0;
-  mouseConf.UpX.wheel = 0;
-  mouseConf.UpX.keyboardEnabled = 0;  
-  mouseConf.UpX.mouseButton =  MOUSE_MIDDLE | rotateB;
+  mouseConf.UpX.mode =  MOUSE_PRESS;  
+  mouseConf.UpX.data.mouse.xAxis = 1;
+  mouseConf.UpX.data.mouse.yAxis = 0;
+  mouseConf.UpX.data.mouse.wheel = 0;
+  mouseConf.UpX.data.mouse.mouseButton =  MOUSE_MIDDLE | rotateB;
 
-  mouseConf.DownX.mouseEnabled = 1;
-  mouseConf.DownX.xAxis = -1;
-  mouseConf.DownX.yAxis = 0;
-  mouseConf.DownX.wheel = 0;
-  mouseConf.DownX.keyboardEnabled = 0;  
-  mouseConf.DownX.mouseButton =  MOUSE_MIDDLE | rotateB;
+  mouseConf.DownX.mode =  MOUSE_PRESS;  
+  mouseConf.DownX.data.mouse.xAxis = -1;
+  mouseConf.DownX.data.mouse.yAxis = 0;
+  mouseConf.DownX.data.mouse.wheel = 0; 
+  mouseConf.DownX.data.mouse.mouseButton =  MOUSE_MIDDLE | rotateB;
 
 
-  mouseConf.UpY.mouseEnabled = 1;
-  mouseConf.UpY.xAxis = 0;
-  mouseConf.UpY.yAxis = -1;
-  mouseConf.UpY.wheel = 0;
-  mouseConf.UpY.keyboardEnabled = 0;  
-  mouseConf.UpY.mouseButton =  MOUSE_MIDDLE | rotateB;
+  mouseConf.UpY.mode =  MOUSE_PRESS;  
+  mouseConf.UpY.data.mouse.xAxis = 0;
+  mouseConf.UpY.data.mouse.yAxis = -1;
+  mouseConf.UpY.data.mouse.wheel = 0;
+  mouseConf.UpY.data.mouse.mouseButton =  MOUSE_MIDDLE | rotateB;
 
-  mouseConf.DownY.mouseEnabled = 1;
-  mouseConf.DownY.xAxis = 0;
-  mouseConf.DownY.yAxis = 1;
-  mouseConf.DownY.wheel = 0;
-  mouseConf.DownY.keyboardEnabled = 0;  
-  mouseConf.DownY.mouseButton =   MOUSE_MIDDLE | rotateB;
+  mouseConf.DownY.mode =  MOUSE_PRESS; 
+  mouseConf.DownY.data.mouse.xAxis = 0;
+  mouseConf.DownY.data.mouse.yAxis = 1;
+  mouseConf.DownY.data.mouse.wheel = 0;
+  mouseConf.DownY.data.mouse.mouseButton =   MOUSE_MIDDLE | rotateB;
 
-  mouseConf.ButtonZ.mouseEnabled = 1;
-  mouseConf.ButtonZ.xAxis = 0;
-  mouseConf.ButtonZ.yAxis = 0;
-  mouseConf.ButtonZ.wheel = 0;
-  mouseConf.ButtonZ.keyboardEnabled = 0;
-  mouseConf.ButtonZ.mouseButton = MOUSE_LEFT;
+  mouseConf.ButtonZ.mode =  MOUSE_PRESS; 
+  mouseConf.ButtonZ.data.mouse.xAxis = 0;
+  mouseConf.ButtonZ.data.mouse.yAxis = 0;
+  mouseConf.ButtonZ.data.mouse.wheel = 0;  
+  mouseConf.ButtonZ.data.mouse.mouseButton = MOUSE_LEFT;
 
 }
 
@@ -516,41 +555,36 @@ void basicMouseConfiguration() {
   mouseState.reset();
   
   
-  mouseConf.UpX.mouseEnabled = 1;
-  mouseConf.UpX.xAxis = 1;
-  mouseConf.UpX.yAxis = 0;
-  mouseConf.UpX.wheel = 0;
-  mouseConf.UpX.keyboardEnabled = 0;  
-  mouseConf.UpX.mouseButton = 0;
+  mouseConf.UpX.mode =  MOUSE_PRESS; 
+  mouseConf.UpX.data.mouse.xAxis = 1;
+  mouseConf.UpX.data.mouse.yAxis = 0;
+  mouseConf.UpX.data.mouse.wheel = 0;
+  mouseConf.UpX.data.mouse.mouseButton = 0;
 
-  mouseConf.DownX.mouseEnabled = 1;
-  mouseConf.DownX.xAxis = -1;
-  mouseConf.DownX.yAxis = 0;
-  mouseConf.DownX.wheel = 0;
-  mouseConf.DownX.keyboardEnabled = 0;  
-  mouseConf.DownX.mouseButton = 0;
+  mouseConf.DownX.mode =  MOUSE_PRESS; 
+  mouseConf.DownX.data.mouse.xAxis = -1;
+  mouseConf.DownX.data.mouse.yAxis = 0;
+  mouseConf.DownX.data.mouse.wheel = 0;  
+  mouseConf.DownX.data.mouse.mouseButton = 0;
 
 
-  mouseConf.UpY.mouseEnabled = 1;
-  mouseConf.UpY.xAxis = 0;
-  mouseConf.UpY.yAxis = -1;
-  mouseConf.UpY.wheel = 0;
-  mouseConf.UpY.keyboardEnabled = 0;  
-  mouseConf.UpY.mouseButton = 0;
+  mouseConf.UpY.mode =  MOUSE_PRESS; 
+  mouseConf.UpY.data.mouse.xAxis = 0;
+  mouseConf.UpY.data.mouse.yAxis = -1;
+  mouseConf.UpY.data.mouse.wheel = 0;
+  mouseConf.UpY.data.mouse.mouseButton = 0;
 
-  mouseConf.DownY.mouseEnabled = 1;
-  mouseConf.DownY.xAxis = 0;
-  mouseConf.DownY.yAxis = 1;
-  mouseConf.DownY.wheel = 0;
-  mouseConf.DownY.keyboardEnabled = 0;  
-  mouseConf.DownY.mouseButton = 0;
+  mouseConf.DownY.mode =  MOUSE_PRESS; 
+  mouseConf.DownY.data.mouse.xAxis = 0;
+  mouseConf.DownY.data.mouse.yAxis = 1;
+  mouseConf.DownY.data.mouse.wheel = 0;  
+  mouseConf.DownY.data.mouse.mouseButton = 0;
 
-  mouseConf.ButtonZ.mouseEnabled = 1;
-  mouseConf.ButtonZ.xAxis = 0;
-  mouseConf.ButtonZ.yAxis = 0;
-  mouseConf.ButtonZ.wheel = 0;
-  mouseConf.ButtonZ.keyboardEnabled = 0;
-  mouseConf.ButtonZ.mouseButton = MOUSE_LEFT;
+  mouseConf.ButtonZ.mode =  MOUSE_PRESS; 
+  mouseConf.ButtonZ.data.mouse.xAxis = 0;
+  mouseConf.ButtonZ.data.mouse.yAxis = 0;
+  mouseConf.ButtonZ.data.mouse.wheel = 0;
+  mouseConf.ButtonZ.data.mouse.mouseButton = MOUSE_LEFT;
 
 }
 
