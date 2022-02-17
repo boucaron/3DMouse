@@ -8,6 +8,7 @@
 #include "Encoder.h" // https://github.com/PaulStoffregen
 
 #define SERIALBUFLEN 40
+#define MOUSEBUFLEN 40
 
 const char *MVERSION = "3DMouseHID V0.0";
 
@@ -116,9 +117,12 @@ struct MouseKeyHID {
           break;
         case MOUSE_PRESS: 
           if ( data.mouse.mouseButton != 0 ) {
-              Mouse.press(data.mouse.mouseButton);
+              Mouse.press(data.mouse.mouseButton);  
+              // DEBUG
+              // Serial.println("Mouse press");            
           }
           Mouse.move(data.mouse.xAxis * XSens, data.mouse.yAxis * YSens, data.mouse.wheel);
+         //  Serial.println("Mouse move = "); Serial.print(data.mouse.xAxis * XSens);
           break;
         case MOUSE_RELEASE:
           if ( data.mouse.mouseButton != 0 ) {
@@ -153,7 +157,8 @@ struct  MouseState {
   int XValue, YValue;
   int XSens, YSens;
 
- 
+  // If already released, prevent a loop annoying for debug
+  int mouseReleased;
 
   void reset() {
     UpX = 0 ; DownX = 0;
@@ -174,6 +179,7 @@ struct  MouseState {
     YZero = 0; XZero = 0;
     YZero = analogRead(vertPin);
     XZero = analogRead(horzPin);
+    mouseReleased = 0;
   }
 
 
@@ -202,15 +208,58 @@ struct  MouseState {
 };
 
 
+// STATIC BUFFER CONTAININGALL THE CONF
+MouseKeyHID mouseBuf[MOUSEBUFLEN];
+
+/**
+ * List of moves to be performed on each "key" in sequence
+ */
+struct MouseKeyConf { 
+  int from; // Index in mouseBuf for the move
+  int to; // Index in mouseBuf for the move
+  
+  void reset() { 
+    from = -1;
+    to  = -1;
+  }
+
+  void print() {
+    Serial.println(to-from); Serial.println(" moves");
+    for(int i = from ; i < to ; i++ ) {      
+      mouseBuf[i].print();
+    }
+  }
+
+  void read() {
+    from = Serial.parseInt();
+    to = Serial.parseInt();
+    for(int i = from ; i < to ; i++ ) {
+      mouseBuf[i].read();
+    }
+  }
+
+  void writeHID(byte up, int XSens, int YSens) {
+    if ( from == -1 || to == -1 ) {
+      return;
+    } else {
+      for(int i = from ; i < to ; i++ ) {
+        mouseBuf[i].writeHID(up, XSens, YSens);
+      }
+    }
+  }
+};
+
+
 struct MouseConf {
-  MouseKeyHID UpX, DownX;
-  MouseKeyHID UpY, DownY;
-  MouseKeyHID UpZ, DownZ;
+  MouseKeyConf UpX, DownX;
+  MouseKeyConf UpY, DownY;
+  MouseKeyConf UpZ, DownZ;
 
-  MouseKeyHID ButtonZ;
-  MouseKeyHID RotateZ;
+  MouseKeyConf ButtonZ;
+  MouseKeyConf RotateZ;
 
-  uint16_t Delay;
+// Run before and after performing any "moves"
+  MouseKeyConf before, after;
 
   void reset() {
     UpX.reset(); DownX.reset();
@@ -219,7 +268,7 @@ struct MouseConf {
 
     ButtonZ.reset();
     RotateZ.reset();
-    Delay = 0;
+
   }
 
   void print() {
@@ -232,46 +281,50 @@ struct MouseConf {
     Serial.print("DownZ:"); DownZ.print(); Serial.println();
     Serial.print("ButtonZ:"); ButtonZ.print(); Serial.println();
     Serial.print("RotateZ:"); RotateZ.print(); Serial.println();
-    Serial.print("Delay:"); Serial.print(Delay); Serial.println();
   }
 
   void read() {
     UpX.read(); DownX.read();
     UpY.read(); DownY.read();
     UpZ.read(); DownZ.read();
-    ButtonZ.read(); RotateZ.read();
-
-    uint8_t delay0 = Serial.read();
-    uint8_t delay1 = Serial.read();
-    Delay =  delay1;
-    Delay << 8;
-    Delay += delay0;
+    ButtonZ.read(); RotateZ.read();    
   }
 
-  bool releasedMouseButton(const MouseKeyHID  &in, byte state, byte mouseButton) {
-    if ( in.mode == MOUSE_PRESS || in.mode == MOUSE_RELEASE ) {
-      if ( ((in.data.mouse.mouseButton & mouseButton) == mouseButton ) && state != 0 ) {
-        return false;
-      }
-    }
-    return true;
-  }
 
-  void checkAndReleaseMouseButton(byte mouseButton, const MouseState &state ) {
-    if ( releasedMouseButton(UpX, state.UpX, mouseButton) &&
-         releasedMouseButton(DownX, state.DownX, mouseButton) &&
-         releasedMouseButton(UpY, state.UpY, mouseButton) &&
-         releasedMouseButton(DownY, state.DownY, mouseButton) &&
-         releasedMouseButton(UpZ, state.UpZ, mouseButton) &&
-         releasedMouseButton(DownZ, state.DownZ, mouseButton) && 
-         releasedMouseButton(ButtonZ, state.ButtonZ, mouseButton) &&
-         releasedMouseButton(RotateZ, state.RotateZ, mouseButton) 
-         ) {
-      Mouse.release(mouseButton);
+  
+
+  void checkAndReleaseMouseButton(byte mouseButton, const MouseState &state, const MouseState &previousState) {
+    if ( state.UpX == 0 && state.UpY == 0 && state.UpZ == 0 && 
+         state.DownX == 0 && state.DownY == 0 && state.DownZ == 0 && 
+         state.ButtonZ == 0 && state.RotateZ == 0 ) { 
+          if ( previousState.UpX != 0 || previousState.UpY != 0 || previousState.UpZ != 0 || 
+                previousState.DownX != 0 || previousState.DownY != 0 || previousState.DownZ != 0 || 
+                previousState.ButtonZ != 0 || previousState.RotateZ !=  0 ) {         
+            Mouse.release(mouseButton);
+            // DEBUG
+            // Serial.println("Mouse release button = ");
+            // Serial.println(mouseButton);
+          }      
          }
   }
 
-  void writeHID(const MouseState &state) {
+  bool atLeastAMove(const MouseState &state ) {
+    if ( state.UpX != 0 || state.UpY != 0 || state.UpZ != 0 ||
+        state.DownX != 0 || state.DownZ != 0 || state.DownY != 0 ||
+        state.ButtonZ != 0 || state.RotateZ != 0 ) {
+      return true;
+    }
+    return false;
+  }
+
+  bool atLeastAButtonPressed(const MouseState &state) {
+    if ( state.ButtonZ != 0 ) {
+       return true;
+    }
+    return false;
+  }
+
+  void writeHID(const MouseState &state, MouseState &previousState) {
 
     // FreeCAD Rotation Test: Refactoring required to have a succession of configuration
     /* if ( (UpX.mouseEnabled && state.UpX != 0) || 
@@ -285,6 +338,10 @@ struct MouseConf {
       Mouse.press(MOUSE_LEFT);
      // delay(5);
     }   */
+
+    if ( atLeastAMove(state) ) {
+      before.writeHID(1, state.XSens, state.YSens);
+    }
     
     UpX.writeHID(state.UpX, state.XSens, state.YSens); 
     DownX.writeHID(state.DownX, state.XSens, state.YSens);
@@ -293,36 +350,39 @@ struct MouseConf {
     UpZ.writeHID(state.UpZ, state.XSens, state.YSens); 
     DownZ.writeHID(state.DownZ, state.XSens, state.YSens);
 
-   
-    checkAndReleaseMouseButton(MOUSE_LEFT, state);
-    checkAndReleaseMouseButton(MOUSE_RIGHT, state);
-    checkAndReleaseMouseButton(MOUSE_MIDDLE, state);
-    
+      
     ButtonZ.writeHID(state.ButtonZ, state.XSens, state.YSens);
-    
-    if (  ButtonZ.mode == MOUSE_PRESS &&  ButtonZ.data.mouse.mouseButton != 0 ) {
-      // Debounce
-      if ( state.ButtonZ != 0 ) {
-        delay(150);
-   /*   } else {
-         Mouse.release(ButtonZ.mouseButton);
-      } */
-    } 
     RotateZ.writeHID(state.RotateZ, state.XSens, state.YSens);
 
+    if ( atLeastAMove(state) ) {
+      after.writeHID(1, state.XSens, state.YSens);
+    }
+
+
+    checkAndReleaseMouseButton(MOUSE_LEFT, state, previousState);
+    checkAndReleaseMouseButton(MOUSE_RIGHT, state, previousState);
+    checkAndReleaseMouseButton(MOUSE_MIDDLE, state, previousState);
+    
+
+     // Debounce
+    if ( atLeastAButtonPressed(state) ) {
+       delay(100);
+    }
 
     // Small delay for lower speed
     if ( (state.XSens >= 1 && state.XSens <= 3) || (state.YSens <= 3 && state.YSens >= 1)  ) {
       if ( state.UpX != 0 || state.DownX != 0 || state.UpY != 0 || state.DownY != 0 ) {
         delay(10); // Basic Mouse        
       }
-    }         
+    } 
+
+    previousState = state;
     
-    }
+    
   }
 };
 
-MouseState mouseState;
+MouseState mouseState, previousMouseState;
 MouseConf mouseConf;
 
 void setup() {
@@ -335,6 +395,7 @@ void setup() {
   pinMode(encCLK, INPUT);
 
   mouseState.setup();
+  previousMouseState.setup();
   mouseConf.reset();
   
   Serial.begin(9600);
@@ -470,23 +531,22 @@ void readMouse() {
 }
 
 void writeHID() {
-  mouseConf.writeHID(mouseState);
- 
-/*
-  Keyboard.releaseAll();
-  Mouse.release(MOUSE_LEFT);
-  Mouse.release(MOUSE_RIGHT);
-  Mouse.release(MOUSE_MIDDLE); */
-  
+  mouseConf.writeHID(mouseState, previousMouseState);
 }
 
 // Simple mouse test
 void mouseTest() {
   mouseState.reset();
   mouseState.UpX = 1;
-  mouseConf.UpX.mode = MOUSE_PRESS;  
-  mouseConf.UpX.data.mouse.mouseButton = 0;
-  mouseConf.UpX.data.mouse.xAxis = 100;
+  mouseState.XSens = 1;
+  mouseState.YSens = 1;
+  mouseConf.UpX.from = 0;
+  mouseConf.UpX.to = 1;
+  mouseBuf[0].mode = MOUSE_PRESS;  
+  mouseBuf[0].data.mouse.mouseButton = 0;
+  mouseBuf[0].data.mouse.xAxis = 100;
+  mouseBuf[0].data.mouse.yAxis = 0;
+  mouseBuf[0].data.mouse.wheel = 0;
   writeHID();
   
   Serial.println("mouseTest()");
@@ -511,80 +571,130 @@ void keyboardTest() {
 void freecadConfiguration(bool rotate) {
 
  mouseState.reset();
+
+
+ mouseConf.before.from = -1;
+ mouseConf.before.to = -1;
+ mouseConf.after.from = -1;
+ mouseConf.after.to = -1;
+ 
  byte rotateB = 0;
  if ( rotate != false )  {
     rotateB = MOUSE_LEFT;   
  } 
    
-  mouseConf.UpX.mode =  MOUSE_PRESS;  
-  mouseConf.UpX.data.mouse.xAxis = 1;
-  mouseConf.UpX.data.mouse.yAxis = 0;
-  mouseConf.UpX.data.mouse.wheel = 0;
-  mouseConf.UpX.data.mouse.mouseButton =  MOUSE_MIDDLE | rotateB;
+  mouseConf.UpX.from = 0; 
+  mouseConf.UpX.to = 1;
+  mouseBuf[0].mode =  MOUSE_PRESS;  
+  mouseBuf[0].data.mouse.xAxis = 1;
+  mouseBuf[0].data.mouse.yAxis = 0;
+  mouseBuf[0].data.mouse.wheel = 0;
+  mouseBuf[0].data.mouse.mouseButton =  MOUSE_MIDDLE | rotateB;
 
-  mouseConf.DownX.mode =  MOUSE_PRESS;  
-  mouseConf.DownX.data.mouse.xAxis = -1;
-  mouseConf.DownX.data.mouse.yAxis = 0;
-  mouseConf.DownX.data.mouse.wheel = 0; 
-  mouseConf.DownX.data.mouse.mouseButton =  MOUSE_MIDDLE | rotateB;
+  mouseConf.DownX.from = 1;
+  mouseConf.DownX.to = 2;
+  mouseBuf[1].mode =  MOUSE_PRESS;  
+  mouseBuf[1].data.mouse.xAxis = -1;
+  mouseBuf[1].data.mouse.yAxis = 0;
+  mouseBuf[1].data.mouse.wheel = 0; 
+  mouseBuf[1].data.mouse.mouseButton =  MOUSE_MIDDLE | rotateB;
 
 
-  mouseConf.UpY.mode =  MOUSE_PRESS;  
-  mouseConf.UpY.data.mouse.xAxis = 0;
-  mouseConf.UpY.data.mouse.yAxis = -1;
-  mouseConf.UpY.data.mouse.wheel = 0;
-  mouseConf.UpY.data.mouse.mouseButton =  MOUSE_MIDDLE | rotateB;
+  mouseConf.UpY.from = 2;
+  mouseConf.UpY.to = 3;
+  mouseBuf[2].mode =  MOUSE_PRESS;  
+  mouseBuf[2].data.mouse.xAxis = 0;
+  mouseBuf[2].data.mouse.yAxis = -1;
+  mouseBuf[2].data.mouse.wheel = 0;
+  mouseBuf[2].data.mouse.mouseButton =  MOUSE_MIDDLE | rotateB;
 
-  mouseConf.DownY.mode =  MOUSE_PRESS; 
-  mouseConf.DownY.data.mouse.xAxis = 0;
-  mouseConf.DownY.data.mouse.yAxis = 1;
-  mouseConf.DownY.data.mouse.wheel = 0;
-  mouseConf.DownY.data.mouse.mouseButton =   MOUSE_MIDDLE | rotateB;
+  mouseConf.DownY.from = 3;
+  mouseConf.DownY.to = 4;
+  mouseBuf[3].mode =  MOUSE_PRESS; 
+  mouseBuf[3].data.mouse.xAxis = 0;
+  mouseBuf[3].data.mouse.yAxis = 1;
+  mouseBuf[3].data.mouse.wheel = 0;
+  mouseBuf[3].data.mouse.mouseButton =   MOUSE_MIDDLE | rotateB;
 
-  mouseConf.ButtonZ.mode =  MOUSE_PRESS; 
-  mouseConf.ButtonZ.data.mouse.xAxis = 0;
-  mouseConf.ButtonZ.data.mouse.yAxis = 0;
-  mouseConf.ButtonZ.data.mouse.wheel = 0;  
-  mouseConf.ButtonZ.data.mouse.mouseButton = MOUSE_LEFT;
+  mouseConf.ButtonZ.from = 4;
+  mouseConf.ButtonZ.to = 5;
+  mouseBuf[4].mode=  MOUSE_PRESS; 
+  mouseBuf[4].data.mouse.xAxis = 0;
+  mouseBuf[4].data.mouse.yAxis = 0;
+  mouseBuf[4].data.mouse.wheel = 0;  
+  mouseBuf[4].data.mouse.mouseButton = MOUSE_LEFT;
 
+  if ( rotate != false )  {
+    mouseConf.before.from = 5;
+    mouseConf.before.to = 7;
+  }
+  else {
+    mouseConf.before.from = -1;
+    mouseConf.before.to = -1;
+  }
+  mouseBuf[5].mode=  MOUSE_PRESS; 
+  mouseBuf[5].data.mouse.xAxis = 0;
+  mouseBuf[5].data.mouse.yAxis = 0;
+  mouseBuf[5].data.mouse.wheel = 0;  
+  mouseBuf[5].data.mouse.mouseButton = MOUSE_MIDDLE;
+  mouseBuf[6].mode=  MOUSE_PRESS; 
+  mouseBuf[6].data.mouse.xAxis = 0;
+  mouseBuf[6].data.mouse.yAxis = 0;
+  mouseBuf[6].data.mouse.wheel = 0;  
+  mouseBuf[6].data.mouse.mouseButton = MOUSE_LEFT;
 }
 
 
 // Basic Mouse Configuration
 void basicMouseConfiguration() { 
   mouseState.reset();
+
+  mouseConf.before.from = -1;
+  mouseConf.before.to = -1;
+  mouseConf.after.from = -1;
+  mouseConf.after.to = -1;
   
   
-  mouseConf.UpX.mode =  MOUSE_PRESS; 
-  mouseConf.UpX.data.mouse.xAxis = 1;
-  mouseConf.UpX.data.mouse.yAxis = 0;
-  mouseConf.UpX.data.mouse.wheel = 0;
-  mouseConf.UpX.data.mouse.mouseButton = 0;
+  mouseConf.UpX.from = 0; 
+  mouseConf.UpX.to = 1;
+  mouseBuf[0].mode =  MOUSE_PRESS;  
+  mouseBuf[0].data.mouse.xAxis = 1;
+  mouseBuf[0].data.mouse.yAxis = 0;
+  mouseBuf[0].data.mouse.wheel = 0;
+  mouseBuf[0].data.mouse.mouseButton =  0;
 
-  mouseConf.DownX.mode =  MOUSE_PRESS; 
-  mouseConf.DownX.data.mouse.xAxis = -1;
-  mouseConf.DownX.data.mouse.yAxis = 0;
-  mouseConf.DownX.data.mouse.wheel = 0;  
-  mouseConf.DownX.data.mouse.mouseButton = 0;
+  mouseConf.DownX.from = 1;
+  mouseConf.DownX.to = 2;
+  mouseBuf[1].mode =  MOUSE_PRESS;  
+  mouseBuf[1].data.mouse.xAxis = -1;
+  mouseBuf[1].data.mouse.yAxis = 0;
+  mouseBuf[1].data.mouse.wheel = 0; 
+  mouseBuf[1].data.mouse.mouseButton =  0;
 
 
-  mouseConf.UpY.mode =  MOUSE_PRESS; 
-  mouseConf.UpY.data.mouse.xAxis = 0;
-  mouseConf.UpY.data.mouse.yAxis = -1;
-  mouseConf.UpY.data.mouse.wheel = 0;
-  mouseConf.UpY.data.mouse.mouseButton = 0;
+  mouseConf.UpY.from = 2;
+  mouseConf.UpY.to = 3;
+  mouseBuf[2].mode =  MOUSE_PRESS;  
+  mouseBuf[2].data.mouse.xAxis = 0;
+  mouseBuf[2].data.mouse.yAxis = -1;
+  mouseBuf[2].data.mouse.wheel = 0;
+  mouseBuf[2].data.mouse.mouseButton =  0;
 
-  mouseConf.DownY.mode =  MOUSE_PRESS; 
-  mouseConf.DownY.data.mouse.xAxis = 0;
-  mouseConf.DownY.data.mouse.yAxis = 1;
-  mouseConf.DownY.data.mouse.wheel = 0;  
-  mouseConf.DownY.data.mouse.mouseButton = 0;
+  mouseConf.DownY.from = 3;
+  mouseConf.DownY.to = 4;
+  mouseBuf[3].mode =  MOUSE_PRESS; 
+  mouseBuf[3].data.mouse.xAxis = 0;
+  mouseBuf[3].data.mouse.yAxis = 1;
+  mouseBuf[3].data.mouse.wheel = 0;
+  mouseBuf[3].data.mouse.mouseButton =  0;
 
-  mouseConf.ButtonZ.mode =  MOUSE_PRESS; 
-  mouseConf.ButtonZ.data.mouse.xAxis = 0;
-  mouseConf.ButtonZ.data.mouse.yAxis = 0;
-  mouseConf.ButtonZ.data.mouse.wheel = 0;
-  mouseConf.ButtonZ.data.mouse.mouseButton = MOUSE_LEFT;
+  mouseConf.ButtonZ.from = 4;
+  mouseConf.ButtonZ.to = 5;
+  mouseBuf[4].mode=  MOUSE_PRESS; 
+  mouseBuf[4].data.mouse.xAxis = 0;
+  mouseBuf[4].data.mouse.yAxis = 0;
+  mouseBuf[4].data.mouse.wheel = 0;  
+  mouseBuf[4].data.mouse.mouseButton = MOUSE_LEFT;
 
 }
 
