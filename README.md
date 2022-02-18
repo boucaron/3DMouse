@@ -50,7 +50,7 @@ Inspired by the great work made by https://github.com/FaqT0tum/Orbion_Space_Mous
 
 ## Firmware 
 - Regular Arduino Env using standard libraries + Encoder library (provided in Arduino IDE): compile and upload
-- *Work in progress*: may change slightly from a commit to another one
+- *PoC*: basic features are there, may still change slightly from a commit to another one
 - High-Level:
     -   Basic Loop: 
         -  Read Serial Port (if something present to change the configuration/the mode of the mouse)
