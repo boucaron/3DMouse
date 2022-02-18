@@ -59,9 +59,9 @@ Inspired by the great work made by https://github.com/FaqT0tum/Orbion_Space_Mous
     -   Features:
         - Debug Hardware (serial monitor) [OK]
         -  Basic Mouse Emulator (single button) [OK]
-        -  FreeCAD (on-going, code refactoring required) [PENDING]
+        -  FreeCAD (translate, rotation mode) [OK]
+        -  Blender (translate, rotation mode) [OK]
         -  ChopChop3D Slicer [PLANNED]
-        -  Blender [PLANNED]
         -  ZBrush [PLANNED]
         -  Fusion360 [PLANNED]
 
