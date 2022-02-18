@@ -30,6 +30,7 @@ long positionEnc  = -999;
 
 void freecadConfiguration(bool);
 void basicMouseConfiguration();
+void blenderConfiguration(bool);
 
 
 
@@ -111,9 +112,13 @@ struct MouseKeyHID {
       switch ( mode ) {       
         case KEYBOARD_PRESS:
           Keyboard.press(data.keyboard.keyboardCode); 
+              // DEBUG
+             // Serial.println("Keyboard press");   
           break;
         case KEYBOARD_RELEASE:
           Keyboard.release(data.keyboard.keyboardCode); 
+          // DEBUG
+          // Serial.println("Keyboard release");   
           break;
         case MOUSE_PRESS: 
           if ( data.mouse.mouseButton != 0 ) {
@@ -281,6 +286,8 @@ struct MouseConf {
     Serial.print("DownZ:"); DownZ.print(); Serial.println();
     Serial.print("ButtonZ:"); ButtonZ.print(); Serial.println();
     Serial.print("RotateZ:"); RotateZ.print(); Serial.println();
+    Serial.print("before:"); before.print(); Serial.println();
+    Serial.print("after:"); after.print(); Serial.println();
   }
 
   void read() {
@@ -288,6 +295,7 @@ struct MouseConf {
     UpY.read(); DownY.read();
     UpZ.read(); DownZ.read();
     ButtonZ.read(); RotateZ.read();    
+    before.read(); after.read();
   }
 
 
@@ -307,6 +315,20 @@ struct MouseConf {
           }      
          }
   }
+  
+  void checkAndReleaseKeyboard(const MouseState &state, const MouseState &previousState) {
+    if ( state.UpX == 0 && state.UpY == 0 && state.UpZ == 0 && 
+         state.DownX == 0 && state.DownY == 0 && state.DownZ == 0 && 
+         state.ButtonZ == 0 && state.RotateZ == 0 ) { 
+          if ( previousState.UpX != 0 || previousState.UpY != 0 || previousState.UpZ != 0 || 
+                previousState.DownX != 0 || previousState.DownY != 0 || previousState.DownZ != 0 || 
+                previousState.ButtonZ != 0 || previousState.RotateZ !=  0 ) {                                  
+            Keyboard.releaseAll();    
+            // DEBUG
+            // Serial.println("Keyboard.releaseAll()");
+            }      
+         }
+  } 
 
   bool atLeastAMove(const MouseState &state ) {
     if ( state.UpX != 0 || state.UpY != 0 || state.UpZ != 0 ||
@@ -324,20 +346,7 @@ struct MouseConf {
     return false;
   }
 
-  void writeHID(const MouseState &state, MouseState &previousState) {
-
-    // FreeCAD Rotation Test: Refactoring required to have a succession of configuration
-    /* if ( (UpX.mouseEnabled && state.UpX != 0) || 
-         (DownX.mouseEnabled && state.DownX != 0)  || 
-         (DownY.mouseEnabled && state.DownY != 0)  ||
-         (UpY.mouseEnabled && state.UpY != 0) 
-          ) {
-      Mouse.press(MOUSE_MIDDLE);
-      // No delay required, but sensitive
-     // delay(5);
-      Mouse.press(MOUSE_LEFT);
-     // delay(5);
-    }   */
+  void writeHID(const MouseState &state, MouseState &previousState) {    
 
     if ( atLeastAMove(state) ) {
       before.writeHID(1, state.XSens, state.YSens);
@@ -362,6 +371,7 @@ struct MouseConf {
     checkAndReleaseMouseButton(MOUSE_LEFT, state, previousState);
     checkAndReleaseMouseButton(MOUSE_RIGHT, state, previousState);
     checkAndReleaseMouseButton(MOUSE_MIDDLE, state, previousState);
+    checkAndReleaseKeyboard(state, previousState);
     
 
      // Debounce
@@ -417,6 +427,8 @@ void helpCommand() {
   Serial.println("f: FreeCAD Translate Mouse Configuration");
   Serial.println("F: FreeCAD Rotate Mouse Configuration");
   Serial.println("m: Basic Mouse Configuration");
+  Serial.println("b: Blender Translate Mouse Configuration");
+  Serial.println("B: Blender Rotate Mouse Configuration");
 }
 
 void readSerialPort() {
@@ -460,7 +472,18 @@ void readSerialPort() {
       case 'm':
         Serial.println("Basic Mouse Mode");
         basicMouseConfiguration();
-        break;          
+        break; 
+      case 'b':
+        Serial.println("Blender Translate Mode");
+        blenderConfiguration(false);
+        break;
+      case 'B':
+        Serial.println("Blender Rotate Mode");
+        blenderConfiguration(true);
+        break; 
+      case 'c':
+        mouseKeyboardTest();
+        break;
       default:
         Serial.print("Unknown command:");
         Serial.print(inByte);
@@ -562,6 +585,37 @@ void keyboardTest() {
  Keyboard.write('V');
  Keyboard.write('V');
  Serial.println("keyboardTest()");
+  
+}
+
+
+void mouseKeyboardTest() {
+  mouseState.reset();
+
+ mouseConf.before.from = -1;
+ mouseConf.before.to = -1;
+ mouseConf.after.from = -1;
+ mouseConf.after.to = -1;
+  
+  mouseState.UpX = 1;
+  mouseState.XSens = 1;
+  mouseState.YSens = 1;
+  mouseConf.UpX.from = 0;
+  mouseConf.UpX.to = 3;
+  mouseBuf[0].mode =  KEYBOARD_PRESS; 
+  mouseBuf[0].data.keyboard.keyboardCode = KEY_LEFT_SHIFT;  
+  mouseBuf[1].mode = MOUSE_PRESS;  
+  mouseBuf[1].data.mouse.mouseButton = 0;
+  mouseBuf[1].data.mouse.xAxis = 10;
+  mouseBuf[1].data.mouse.yAxis = 0;
+  mouseBuf[1].data.mouse.wheel = 0;
+  mouseBuf[2].mode =  KEYBOARD_PRESS; 
+  mouseBuf[2].data.keyboard.keyboardCode = 'a';  
+    
+  writeHID();
+  Keyboard.releaseAll();
+  Serial.println("mouseKeyboardTest()");
+  
   
 }
 
@@ -695,6 +749,82 @@ void basicMouseConfiguration() {
   mouseBuf[4].data.mouse.yAxis = 0;
   mouseBuf[4].data.mouse.wheel = 0;  
   mouseBuf[4].data.mouse.mouseButton = MOUSE_LEFT;
+
+}
+
+
+void blenderConfiguration(bool rotate) {
+ mouseState.reset();
+
+
+ mouseConf.before.from = -1;
+ mouseConf.before.to = -1;
+ mouseConf.after.from = -1;
+ mouseConf.after.to = -1;
+  
+   
+  mouseConf.UpX.from = 0; 
+  mouseConf.UpX.to = 1;
+  mouseBuf[0].mode =  MOUSE_PRESS;  
+  mouseBuf[0].data.mouse.xAxis = 1;
+  mouseBuf[0].data.mouse.yAxis = 0;
+  mouseBuf[0].data.mouse.wheel = 0;
+  mouseBuf[0].data.mouse.mouseButton =  MOUSE_MIDDLE;
+
+  mouseConf.DownX.from = 1;
+  mouseConf.DownX.to = 2;
+  mouseBuf[1].mode =  MOUSE_PRESS;  
+  mouseBuf[1].data.mouse.xAxis = -1;
+  mouseBuf[1].data.mouse.yAxis = 0;
+  mouseBuf[1].data.mouse.wheel = 0; 
+  mouseBuf[1].data.mouse.mouseButton =  MOUSE_MIDDLE;
+
+
+  mouseConf.UpY.from = 2;
+  mouseConf.UpY.to = 3;
+  mouseBuf[2].mode =  MOUSE_PRESS;  
+  mouseBuf[2].data.mouse.xAxis = 0;
+  mouseBuf[2].data.mouse.yAxis = -1;
+  mouseBuf[2].data.mouse.wheel = 0;
+  mouseBuf[2].data.mouse.mouseButton =  MOUSE_MIDDLE;
+
+  mouseConf.DownY.from = 3;
+  mouseConf.DownY.to = 4;
+  mouseBuf[3].mode =  MOUSE_PRESS; 
+  mouseBuf[3].data.mouse.xAxis = 0;
+  mouseBuf[3].data.mouse.yAxis = 1;
+  mouseBuf[3].data.mouse.wheel = 0;
+  mouseBuf[3].data.mouse.mouseButton =   MOUSE_MIDDLE;
+
+  mouseConf.ButtonZ.from = 4;
+  mouseConf.ButtonZ.to = 5;
+  mouseBuf[4].mode=  MOUSE_PRESS; 
+  mouseBuf[4].data.mouse.xAxis = 0;
+  mouseBuf[4].data.mouse.yAxis = 0;
+  mouseBuf[4].data.mouse.wheel = 0;  
+  mouseBuf[4].data.mouse.mouseButton = MOUSE_LEFT;
+
+  if ( rotate == false )  {
+    mouseConf.before.from = 5;
+    mouseConf.before.to = 7;
+    mouseConf.after.from = -1;
+    mouseConf.after.to = -1;
+  }
+  else {
+    mouseConf.before.from = -1;
+    mouseConf.before.to = -1;
+    mouseConf.after.from = -1;
+    mouseConf.before.to = -1;
+  }
+ 
+  mouseBuf[5].mode =  KEYBOARD_PRESS; 
+  mouseBuf[5].data.keyboard.keyboardCode = KEY_LEFT_SHIFT;  
+  mouseBuf[6].mode=  MOUSE_PRESS; 
+  mouseBuf[6].data.mouse.xAxis = 0;
+  mouseBuf[6].data.mouse.yAxis = 0;
+  mouseBuf[6].data.mouse.wheel = 0;  
+  mouseBuf[6].data.mouse.mouseButton = MOUSE_MIDDLE;
+ 
 
 }
 
