@@ -33,6 +33,7 @@ void basicMouseConfiguration();
 void blenderConfiguration(bool);
 void chopchop3DConfiguration(bool);
 void zBrushConfiguration(int);
+void fusion360Configuration(bool);
 
 
 enum MouseKeyHIDMode {
@@ -435,6 +436,8 @@ void helpCommand() {
   Serial.println("z: zBrush Translate Mouse Configuration");
   Serial.println("Z: zBrush Rotate Mouse Configuration");
   Serial.println("x: zBrush Scale Mouse Configuration");
+  Serial.println("u: Fusion360 Translate Mouse Configuration");
+  Serial.println("U: Fusion360 Rotate Mouse Configuration");
 }
 
 void readSerialPort() {
@@ -507,6 +510,14 @@ void readSerialPort() {
         Serial.println("zBrush Scale Mode");
         zBrushConfiguration(1);
         break;     
+      case 'u':
+        Serial.println("Fusion360 Translate Mode");
+        fusion360Configuration(false);
+        break;
+      case 'U':
+        Serial.println("Fusion360 Rotate Mode");
+        fusion360Configuration(true);
+        break;
       default:
         Serial.print("Unknown command:");
         Serial.print(inByte);
@@ -995,6 +1006,81 @@ void zBrushConfiguration(int mode) {
 
 }
 
+
+void fusion360Configuration(bool rotate) {
+  mouseState.reset();
+
+
+ mouseConf.before.from = -1;
+ mouseConf.before.to = -1;
+ mouseConf.after.from = -1;
+ mouseConf.after.to = -1;
+  
+   
+  mouseConf.UpX.from = 0; 
+  mouseConf.UpX.to = 1;
+  mouseBuf[0].mode =  MOUSE_PRESS;  
+  mouseBuf[0].data.mouse.xAxis = 1;
+  mouseBuf[0].data.mouse.yAxis = 0;
+  mouseBuf[0].data.mouse.wheel = 0;
+  mouseBuf[0].data.mouse.mouseButton =  MOUSE_MIDDLE;
+
+  mouseConf.DownX.from = 1;
+  mouseConf.DownX.to = 2;
+  mouseBuf[1].mode =  MOUSE_PRESS;  
+  mouseBuf[1].data.mouse.xAxis = -1;
+  mouseBuf[1].data.mouse.yAxis = 0;
+  mouseBuf[1].data.mouse.wheel = 0; 
+  mouseBuf[1].data.mouse.mouseButton =  MOUSE_MIDDLE;
+
+
+  mouseConf.UpY.from = 2;
+  mouseConf.UpY.to = 3;
+  mouseBuf[2].mode =  MOUSE_PRESS;  
+  mouseBuf[2].data.mouse.xAxis = 0;
+  mouseBuf[2].data.mouse.yAxis = -1;
+  mouseBuf[2].data.mouse.wheel = 0;
+  mouseBuf[2].data.mouse.mouseButton =  MOUSE_MIDDLE;
+
+  mouseConf.DownY.from = 3;
+  mouseConf.DownY.to = 4;
+  mouseBuf[3].mode =  MOUSE_PRESS; 
+  mouseBuf[3].data.mouse.xAxis = 0;
+  mouseBuf[3].data.mouse.yAxis = 1;
+  mouseBuf[3].data.mouse.wheel = 0;
+  mouseBuf[3].data.mouse.mouseButton =   MOUSE_MIDDLE;
+
+  mouseConf.ButtonZ.from = 4;
+  mouseConf.ButtonZ.to = 5;
+  mouseBuf[4].mode=  MOUSE_PRESS; 
+  mouseBuf[4].data.mouse.xAxis = 0;
+  mouseBuf[4].data.mouse.yAxis = 0;
+  mouseBuf[4].data.mouse.wheel = 0;  
+  mouseBuf[4].data.mouse.mouseButton = MOUSE_LEFT;
+
+  if ( rotate == true )  {
+    mouseConf.before.from = 5;
+    mouseConf.before.to = 7;
+    mouseConf.after.from = -1;
+    mouseConf.after.to = -1;
+  }
+  else {
+    mouseConf.before.from = -1;
+    mouseConf.before.to = -1;
+    mouseConf.after.from = -1;
+    mouseConf.before.to = -1;
+  }
+ 
+  mouseBuf[5].mode =  KEYBOARD_PRESS; 
+  mouseBuf[5].data.keyboard.keyboardCode = KEY_LEFT_SHIFT;  
+  mouseBuf[6].mode=  MOUSE_PRESS; 
+  mouseBuf[6].data.mouse.xAxis = 0;
+  mouseBuf[6].data.mouse.yAxis = 0;
+  mouseBuf[6].data.mouse.wheel = 0;  
+  mouseBuf[6].data.mouse.mouseButton = MOUSE_MIDDLE;
+ 
+
+}
 
 
 
