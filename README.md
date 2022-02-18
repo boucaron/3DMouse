@@ -62,7 +62,7 @@ Inspired by the great work made by https://github.com/FaqT0tum/Orbion_Space_Mous
         -  FreeCAD (translate, rotation mode) [OK]
         -  Blender (translate, rotation mode) [OK]
         -  ChopChop3D Slicer (translate, rotation mode) [OK]
-        -  ZBrush [PLANNED]
+        -  ZBrush (translate, rotation, scale mode) [TO TEST]
         -  Fusion360 [PLANNED]
 
 ## Software
