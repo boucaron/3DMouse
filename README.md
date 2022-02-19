@@ -68,6 +68,7 @@ Inspired by the great work made by https://github.com/FaqT0tum/Orbion_Space_Mous
         -  Connect the 3DMouse to the Computer
         -  Arduino IDE: Compile and Upload the Firmware
         -  Arduino IDE: Launch the Serial Monitor
+![](firmware/Images/Main.PNG)	
         -  Connect with 9600 baud, No End of Line
         -  Type H and Send
         -  Then choose the mode you need: Type the character and Send
