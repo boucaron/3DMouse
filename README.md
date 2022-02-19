@@ -62,8 +62,15 @@ Inspired by the great work made by https://github.com/FaqT0tum/Orbion_Space_Mous
         -  FreeCAD (translate, rotation mode) [OK]
         -  Blender (translate, rotation mode) [OK]
         -  ChopChop3D Slicer (translate, rotation mode) [OK]
-        -  Fusion360 (translate, rotation) [OK]	
+        -  Fusion360 (translate, rotation mode) [OK]	
         -  ZBrush (translate, rotation, scale mode) [TO TEST]
+    -   How to:
+        -  Connect the 3DMouse to the Computer
+	-  Arduino IDE: Compile and Upload the Firmware
+	-  Arduino IDE: Launch the Serial Monitor
+	-  Connect with 9600 baud, No End of Line
+	-  Type H and Send
+	-  Then choose the mode you need: Type the character and Send
 
 ## Software
 - *Planning* depends on the firmware stuff required
