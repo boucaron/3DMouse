@@ -2,7 +2,7 @@
 ## Status
 This is still in prototyping phase.... far away from a polished product by any means, nerd only.
  - Basic Rough Hardware [OK]
- - Firmware [In Progress]
+ - Firmware [OK]
  - Software for Customization [PENDING]
 
 ## Overview
