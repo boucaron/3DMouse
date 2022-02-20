@@ -97,6 +97,7 @@ class ControllerDialog(QDialog):
         ui.zBrushTranslateMode.clicked.connect(self.zBrushTranslateMode)
         ui.zBrushScaleMode.clicked.connect(self.zBrushScaleMode)
         ui.zBrushRotateMode.clicked.connect(self.zBrushRotateMode)
+        ui.serialSend.clicked.connect(self.onSendButton)
 
     def mouseMode(self):
         print("mouseMode")
@@ -146,6 +147,11 @@ class ControllerDialog(QDialog):
         print("zBrushRotateMode")
         self.serialPortSend('Z')
 
+    def onSendButton(self):
+        print("onSendButton")
+        ret = self.ui.serialInput.text();
+        print(ret);
+        self.serialPortSend(ret[0]);
 
         
 
