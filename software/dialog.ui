@@ -39,7 +39,7 @@
            </property>
            <property name="icon">
             <iconset>
-             <normaloff>blender_icon_64x64.png</normaloff>blender_icon_64x64.png</iconset>
+             <normaloff>ui/Blender-icon.png</normaloff>ui/Blender-icon.png</iconset>
            </property>
            <property name="iconSize">
             <size>
@@ -65,7 +65,7 @@
            </property>
            <property name="icon">
             <iconset>
-             <normaloff>icons8-autodesk-fusion-360.png</normaloff>icons8-autodesk-fusion-360.png</iconset>
+             <normaloff>ui/icons8-autodesk-fusion-360.png</normaloff>ui/icons8-autodesk-fusion-360.png</iconset>
            </property>
            <property name="iconSize">
             <size>
@@ -107,7 +107,7 @@
            </property>
            <property name="icon">
             <iconset>
-             <normaloff>zBrush.png</normaloff>zBrush.png</iconset>
+             <normaloff>ui/zBrush.png</normaloff>ui/zBrush.png</iconset>
            </property>
            <property name="iconSize">
             <size>
@@ -133,7 +133,7 @@
            </property>
            <property name="icon">
             <iconset>
-             <normaloff>zBrush.png</normaloff>zBrush.png</iconset>
+             <normaloff>ui/zBrush.png</normaloff>ui/zBrush.png</iconset>
            </property>
            <property name="iconSize">
             <size>
@@ -159,7 +159,7 @@
            </property>
            <property name="icon">
             <iconset>
-             <normaloff>CC3D.png</normaloff>CC3D.png</iconset>
+             <normaloff>ui/CC3D.png</normaloff>ui/CC3D.png</iconset>
            </property>
            <property name="iconSize">
             <size>
@@ -185,7 +185,7 @@
            </property>
            <property name="icon">
             <iconset>
-             <normaloff>Freecad.PNG</normaloff>Freecad.PNG</iconset>
+             <normaloff>ui/Freecad.PNG</normaloff>ui/Freecad.PNG</iconset>
            </property>
            <property name="iconSize">
             <size>
@@ -211,7 +211,7 @@
            </property>
            <property name="icon">
             <iconset>
-             <normaloff>icons8-autodesk-fusion-360.png</normaloff>icons8-autodesk-fusion-360.png</iconset>
+             <normaloff>ui/icons8-autodesk-fusion-360.png</normaloff>ui/icons8-autodesk-fusion-360.png</iconset>
            </property>
            <property name="iconSize">
             <size>
@@ -237,7 +237,7 @@
            </property>
            <property name="icon">
             <iconset>
-             <normaloff>Freecad.PNG</normaloff>Freecad.PNG</iconset>
+             <normaloff>ui/Freecad.PNG</normaloff>ui/Freecad.PNG</iconset>
            </property>
            <property name="iconSize">
             <size>
@@ -263,7 +263,7 @@
            </property>
            <property name="icon">
             <iconset>
-             <normaloff>blender_icon_64x64.png</normaloff>blender_icon_64x64.png</iconset>
+             <normaloff>ui/Blender-icon.png</normaloff>ui/Blender-icon.png</iconset>
            </property>
            <property name="iconSize">
             <size>
@@ -289,7 +289,7 @@
            </property>
            <property name="icon">
             <iconset>
-             <normaloff>CC3D.png</normaloff>CC3D.png</iconset>
+             <normaloff>ui/CC3D.png</normaloff>ui/CC3D.png</iconset>
            </property>
            <property name="iconSize">
             <size>
@@ -315,7 +315,7 @@
            </property>
            <property name="icon">
             <iconset>
-             <normaloff>zBrush.png</normaloff>zBrush.png</iconset>
+             <normaloff>ui/zBrush.png</normaloff>ui/zBrush.png</iconset>
            </property>
            <property name="iconSize">
             <size>
