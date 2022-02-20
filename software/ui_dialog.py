@@ -15,10 +15,10 @@ from PySide6.QtGui import (QBrush, QColor, QConicalGradient, QCursor,
     QFont, QFontDatabase, QGradient, QIcon,
     QImage, QKeySequence, QLinearGradient, QPainter,
     QPalette, QPixmap, QRadialGradient, QTransform)
-from PySide6.QtWidgets import (QAbstractButton, QApplication, QComboBox, QDialog,
-    QDialogButtonBox, QFormLayout, QGridLayout, QLabel,
-    QLineEdit, QPlainTextEdit, QPushButton, QSizePolicy,
-    QTabWidget, QVBoxLayout, QWidget)
+from PySide6.QtWidgets import (QApplication, QComboBox, QDialog, QFormLayout,
+    QGridLayout, QLabel, QLineEdit, QPlainTextEdit,
+    QPushButton, QSizePolicy, QTabWidget, QTextEdit,
+    QVBoxLayout, QWidget)
 
 class Ui_Dialog(object):
     def setupUi(self, Dialog):
@@ -193,21 +193,19 @@ class Ui_Dialog(object):
         self.tab_3.addTab(self.tab_5, "")
         self.tab_4 = QWidget()
         self.tab_4.setObjectName(u"tab_4")
+        self.verticalLayout_3 = QVBoxLayout(self.tab_4)
+        self.verticalLayout_3.setObjectName(u"verticalLayout_3")
+        self.textEdit = QTextEdit(self.tab_4)
+        self.textEdit.setObjectName(u"textEdit")
+
+        self.verticalLayout_3.addWidget(self.textEdit)
+
         self.tab_3.addTab(self.tab_4, "")
 
         self.verticalLayout.addWidget(self.tab_3)
 
-        self.buttonBox = QDialogButtonBox(Dialog)
-        self.buttonBox.setObjectName(u"buttonBox")
-        self.buttonBox.setOrientation(Qt.Horizontal)
-        self.buttonBox.setStandardButtons(QDialogButtonBox.Apply|QDialogButtonBox.Close|QDialogButtonBox.Reset)
-
-        self.verticalLayout.addWidget(self.buttonBox)
-
 
         self.retranslateUi(Dialog)
-        self.buttonBox.accepted.connect(Dialog.accept)
-        self.buttonBox.rejected.connect(Dialog.reject)
 
         self.tab_3.setCurrentIndex(0)
 
@@ -270,6 +268,17 @@ class Ui_Dialog(object):
         self.label.setText(QCoreApplication.translate("Dialog", u"Serial Port:", None))
         self.serialSend.setText(QCoreApplication.translate("Dialog", u"Send", None))
         self.tab_3.setTabText(self.tab_3.indexOf(self.tab_5), QCoreApplication.translate("Dialog", u"Settings", None))
+        self.textEdit.setHtml(QCoreApplication.translate("Dialog", u"<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.0//EN\" \"http://www.w3.org/TR/REC-html40/strict.dtd\">\n"
+"<html><head><meta name=\"qrichtext\" content=\"1\" /><meta charset=\"utf-8\" /><style type=\"text/css\">\n"
+"p, li { white-space: pre-wrap; }\n"
+"</style></head><body style=\" font-family:'Segoe UI'; font-size:9pt; font-weight:400; font-style:normal;\">\n"
+"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\">3DMouse Controller</p>\n"
+"<p style=\"-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><br /></p>\n"
+"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><a href=\"https://github.com/boucaron/3DMouse\"><span style=\" text-decoration: underline; color:#0000ff;\">https://github.com/boucaron/3DMouse</span></a></p>\n"
+"<p style=\"-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px;"
+                        " margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><br /></p>\n"
+"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\">(c) 2022 Julien BOUCARON</p>\n"
+"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\">Under MIT License</p></body></html>", None))
         self.tab_3.setTabText(self.tab_3.indexOf(self.tab_4), QCoreApplication.translate("Dialog", u"About", None))
     # retranslateUi
 
