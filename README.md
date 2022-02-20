@@ -3,7 +3,7 @@
 This is still in prototyping phase.... far away from a polished product by any means, nerd only.
  - Basic Rough Hardware [OK]
  - Firmware [OK]
- - Software for Customization [PENDING]
+ - Software for Control and Customization [Control OK, Customization PENDING]
 
 ## Overview
 Inspired by the great work made by https://github.com/FaqT0tum/Orbion_Space_Mouse
@@ -74,10 +74,11 @@ Inspired by the great work made by https://github.com/FaqT0tum/Orbion_Space_Mous
         -  Then choose the mode you need: Type the character and Send
 
 ## Software
-- *Planning* depends on the firmware stuff required
-    -   Check status of the Mouse
-    -   Read/Update on the fly the Mouse Configuration 
-    -   Customization for Mouse Configuration
+- *PoC*: basic features are there, may still change slightly from a commit to another one
+    -   Connect to the Mouse [OK]
+    -   Serial Port Monitor [OK]
+    -   Update the Mode of the Mouse on the Fly with Buttons [OK]
+    -   Customization for Mouse Configuration [PENDING]
     
 # License
 **MIT** see LICENSE file.
