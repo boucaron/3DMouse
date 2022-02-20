@@ -62,6 +62,8 @@ class ControllerDialog(QDialog):
             return
         else:
             print("Connected to 3DMouse")
+            self.portSerial.setDataTerminalReady(True)
+            self.portSerial.setRequestToSend(True)
             self.serialPortSend('H')
         
     def serialPortRead(self):
@@ -70,18 +72,16 @@ class ControllerDialog(QDialog):
         print(ret)
         while ( self.portSerial.waitForReadyRead(100)):
             ret += self.portSerial.readAll()
-        self.ui.serialOutput.appendPlainText(ret)
+        self.ui.serialOutput.appendPlainText(ret.data().decode())
         
     def serialPortSend(self, value):
         print("serialPortSend")
         print(value)
-        ret = self.portSerial.putChar(value);
-        print("ret = ");
-        print(ret);        
-        self.ui.serialOutput.appendPlainText("Send = ");
-        self.ui.serialOutput.appendPlainText(value);
-        
-        
+        ret = self.portSerial.putChar(value)
+        print("ret = ")
+        print(ret)
+        self.ui.serialOutput.appendPlainText("Send = ")
+        self.ui.serialOutput.appendPlainText(value)                                
         
 
     def connectUi(self, ui):
