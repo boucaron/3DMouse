@@ -65,7 +65,7 @@
            </property>
            <property name="icon">
             <iconset>
-             <normaloff>icons8-autodesk-fusion-360.svg</normaloff>icons8-autodesk-fusion-360.svg</iconset>
+             <normaloff>icons8-autodesk-fusion-360.png</normaloff>icons8-autodesk-fusion-360.png</iconset>
            </property>
            <property name="iconSize">
             <size>
@@ -185,7 +185,7 @@
            </property>
            <property name="icon">
             <iconset>
-             <normaloff>Freecad.svg</normaloff>Freecad.svg</iconset>
+             <normaloff>Freecad.PNG</normaloff>Freecad.PNG</iconset>
            </property>
            <property name="iconSize">
             <size>
@@ -211,7 +211,7 @@
            </property>
            <property name="icon">
             <iconset>
-             <normaloff>icons8-autodesk-fusion-360.svg</normaloff>icons8-autodesk-fusion-360.svg</iconset>
+             <normaloff>icons8-autodesk-fusion-360.png</normaloff>icons8-autodesk-fusion-360.png</iconset>
            </property>
            <property name="iconSize">
             <size>
@@ -237,7 +237,7 @@
            </property>
            <property name="icon">
             <iconset>
-             <normaloff>Freecad.svg</normaloff>Freecad.svg</iconset>
+             <normaloff>Freecad.PNG</normaloff>Freecad.PNG</iconset>
            </property>
            <property name="iconSize">
             <size>

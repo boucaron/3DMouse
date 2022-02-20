@@ -43,7 +43,7 @@ class Ui_Dialog(object):
         sizePolicy.setHeightForWidth(self.BlenderTranslateMode.sizePolicy().hasHeightForWidth())
         self.BlenderTranslateMode.setSizePolicy(sizePolicy)
         icon = QIcon()
-        icon.addFile(u"blender_icon_64x64.png", QSize(), QIcon.Normal, QIcon.Off)
+        icon.addFile(u"ui\blender_icon_64x64.png", QSize(), QIcon.Normal, QIcon.Off)
         self.BlenderTranslateMode.setIcon(icon)
         self.BlenderTranslateMode.setIconSize(QSize(32, 32))
 
@@ -54,7 +54,7 @@ class Ui_Dialog(object):
         sizePolicy.setHeightForWidth(self.Fusion360TranslateMode.sizePolicy().hasHeightForWidth())
         self.Fusion360TranslateMode.setSizePolicy(sizePolicy)
         icon1 = QIcon()
-        icon1.addFile(u"icons8-autodesk-fusion-360.svg", QSize(), QIcon.Normal, QIcon.Off)
+        icon1.addFile(u"ui\icons8-autodesk-fusion-360.png", QSize(), QIcon.Normal, QIcon.Off)
         self.Fusion360TranslateMode.setIcon(icon1)
         self.Fusion360TranslateMode.setIconSize(QSize(32, 32))
 
@@ -72,7 +72,7 @@ class Ui_Dialog(object):
         sizePolicy.setHeightForWidth(self.zBrushRotateMode.sizePolicy().hasHeightForWidth())
         self.zBrushRotateMode.setSizePolicy(sizePolicy)
         icon2 = QIcon()
-        icon2.addFile(u"zBrush.png", QSize(), QIcon.Normal, QIcon.Off)
+        icon2.addFile(u"ui\zBrush.png", QSize(), QIcon.Normal, QIcon.Off)
         self.zBrushRotateMode.setIcon(icon2)
         self.zBrushRotateMode.setIconSize(QSize(32, 32))
 
@@ -92,7 +92,7 @@ class Ui_Dialog(object):
         sizePolicy.setHeightForWidth(self.ChopChop3DSlicerTranslateMode.sizePolicy().hasHeightForWidth())
         self.ChopChop3DSlicerTranslateMode.setSizePolicy(sizePolicy)
         icon3 = QIcon()
-        icon3.addFile(u"CC3D.png", QSize(), QIcon.Normal, QIcon.Off)
+        icon3.addFile(u"ui\CC3D.png", QSize(), QIcon.Normal, QIcon.Off)
         self.ChopChop3DSlicerTranslateMode.setIcon(icon3)
         self.ChopChop3DSlicerTranslateMode.setIconSize(QSize(32, 32))
 
@@ -103,7 +103,7 @@ class Ui_Dialog(object):
         sizePolicy.setHeightForWidth(self.FreeCADTranslateMode.sizePolicy().hasHeightForWidth())
         self.FreeCADTranslateMode.setSizePolicy(sizePolicy)
         icon4 = QIcon()
-        icon4.addFile(u"Freecad.svg", QSize(), QIcon.Normal, QIcon.Off)
+        icon4.addFile(u"ui\Freecad.PNG", QSize(), QIcon.Normal, QIcon.Off)
         self.FreeCADTranslateMode.setIcon(icon4)
         self.FreeCADTranslateMode.setIconSize(QSize(32, 32))
 
