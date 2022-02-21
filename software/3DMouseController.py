@@ -1,3 +1,5 @@
+# (c) 2022 Julien BOUCARON under MIT License
+
 import sys
 import random
 from PySide6 import QtCore, QtWidgets, QtGui
@@ -7,9 +9,10 @@ from PySide6.QtSerialPort import QSerialPortInfo, QSerialPort
 from PySide6.QtCore import QIODevice, QByteArray, QTimer
 from ui_dialog import Ui_Dialog
 
-
+# Arduino Pro Micro SerialPort IDs
 PRODUCT_ID = 32822
 VENDOR_ID = 9025
+
 
 class ControllerDialog(QDialog):
 
@@ -26,6 +29,9 @@ class ControllerDialog(QDialog):
         self.serialPortSetup()
         self.connectUi(self.ui)
 
+#List ports
+#Try to detect the 3DMouse (if not show an error message)
+# If so connect to the first one taken (send a warning if more than one)
     def serialPortSetup(self):
         self.ui.serialPorts.clear()
         self.ports = QSerialPortInfo.availablePorts()
@@ -54,6 +60,8 @@ class ControllerDialog(QDialog):
         if ( found == False ):
             QMessageBox().warning(self, "No 3D Mouse", "No 3D Mouse Detected, Please go in Settings and click on Refresh")
 
+#Connect to a specific port: index of the combobox
+# See previous method + comment
     def serialPortConnectAtIndex(self, index):
         if ( self.port == None ):
             print("No 3DMouse Detected")
@@ -78,7 +86,8 @@ class ControllerDialog(QDialog):
             self.serialPortSend('H', None)
             QMessageBox().information(self, "Connected to 3D Mouse", "3D Mouse Detected, Connected")
         
-            
+# Variant of the previous one
+# Just called from @see serialPortSetup
     def serialPortConnect(self):
         print("Trying to connect to the serialPort")
         if ( self.port == None ):
@@ -102,7 +111,8 @@ class ControllerDialog(QDialog):
             self.portSerial.setRequestToSend(True)
             self.serialPortSend('H', None)
             QMessageBox().information(self, "Connected to 3D Mouse", "3D Mouse Detected, Connected")
-        
+
+# Read all from the serial port and put in the Settings/PlainTextEdit            
     def serialPortRead(self):
         print("serialPortRead")
         ret =  self.portSerial.readAll()
@@ -110,7 +120,8 @@ class ControllerDialog(QDialog):
         while ( self.portSerial.waitForReadyRead(100)):
             ret += self.portSerial.readAll()
         self.ui.serialOutput.appendPlainText(ret.data().decode())
-        
+
+# Send the value (char) to the 3D Mouse, optionally put a message to the user that autocloses        
     def serialPortSend(self, value, message):
         print("serialPortSend")
         print(value)
@@ -127,10 +138,10 @@ class ControllerDialog(QDialog):
             qm.setText(message)
             qm.setStandardButtons(QMessageBox.Ok)
             qm.setDefaultButton(QMessageBox.Ok)
-            QTimer.singleShot(2000, lambda: qm.done(0))
+            QTimer.singleShot(2000, lambda: qm.done(0)) # Autoclose trick
             qm.exec()
         
-
+# Setup the ui and connect buttons
     def connectUi(self, ui):
         ui.mouseMode.clicked.connect(self.mouseMode)
         ui.FreeCADTranslateMode.clicked.connect(self.freeCADTranslateMode)
@@ -148,6 +159,8 @@ class ControllerDialog(QDialog):
         ui.refresh.clicked.connect(self.onRefresh)
         ui.connect.clicked.connect(self.onConnect)
 
+# Just callbacks from the buttons        
+        
     def mouseMode(self):
         print("mouseMode")
         self.serialPortSend('m',"Basic Mouse Mode Enabled")
@@ -196,6 +209,7 @@ class ControllerDialog(QDialog):
         print("zBrushRotateMode")
         self.serialPortSend('Z',"zBrush Rotate Mode Enabled")
 
+# Send to the firmware the command (single char otherstuff ignored)      
     def onSendButton(self):
         print("onSendButton")
         ret = self.ui.serialInput.text();
@@ -204,11 +218,13 @@ class ControllerDialog(QDialog):
             self.serialPortSend(ret[0], None);
         else:
             QMessageBox().warning(self, "Nothing to Send", "Please type something to send")
-
+            
+# Refresh all serialports and try to detect the 3DMouse
     def onRefresh(self):
         print("onRefresh")
         self.serialPortSetup()
 
+# Connect with the selected port in the combobox        
     def onConnect(self):
         print("onConnect")
         if ( self.port == None or self.ports == None ):
