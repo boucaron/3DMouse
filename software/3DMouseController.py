@@ -4,7 +4,7 @@ from PySide6 import QtCore, QtWidgets, QtGui
 from PySide6.QtWidgets import QDialog, QMessageBox
 from PySide6.QtCore import QObject, SIGNAL, SLOT
 from PySide6.QtSerialPort import QSerialPortInfo, QSerialPort
-from PySide6.QtCore import QIODevice, QByteArray
+from PySide6.QtCore import QIODevice, QByteArray, QTimer
 from ui_dialog import Ui_Dialog
 
 
@@ -75,7 +75,7 @@ class ControllerDialog(QDialog):
             print("Connected to 3DMouse")
             self.portSerial.setDataTerminalReady(True)
             self.portSerial.setRequestToSend(True)
-            self.serialPortSend('H')
+            self.serialPortSend('H', None)
             QMessageBox().information(self, "Connected to 3D Mouse", "3D Mouse Detected, Connected")
         
             
@@ -100,7 +100,7 @@ class ControllerDialog(QDialog):
             print("Connected to 3DMouse")
             self.portSerial.setDataTerminalReady(True)
             self.portSerial.setRequestToSend(True)
-            self.serialPortSend('H')
+            self.serialPortSend('H', None)
             QMessageBox().information(self, "Connected to 3D Mouse", "3D Mouse Detected, Connected")
         
     def serialPortRead(self):
@@ -111,14 +111,24 @@ class ControllerDialog(QDialog):
             ret += self.portSerial.readAll()
         self.ui.serialOutput.appendPlainText(ret.data().decode())
         
-    def serialPortSend(self, value):
+    def serialPortSend(self, value, message):
         print("serialPortSend")
         print(value)
         ret = self.portSerial.putChar(value)
         print("ret = ")
         print(ret)
         self.ui.serialOutput.appendPlainText("Send = ")
-        self.ui.serialOutput.appendPlainText(value)                                
+        self.ui.serialOutput.appendPlainText(value)
+        if ( message == None ):
+            print("No message")
+        else:
+            qm = QMessageBox(self)
+            qm.setWindowTitle("3D Mouse Controller")
+            qm.setText(message)
+            qm.setStandardButtons(QMessageBox.Ok)
+            qm.setDefaultButton(QMessageBox.Ok)
+            QTimer.singleShot(2000, lambda: qm.done(0))
+            qm.exec()
         
 
     def connectUi(self, ui):
@@ -140,57 +150,60 @@ class ControllerDialog(QDialog):
 
     def mouseMode(self):
         print("mouseMode")
-        self.serialPortSend('m')
+        self.serialPortSend('m',"Basic Mouse Mode Enabled")
 
     def freeCADTranslateMode(self):
         print("freeCADTranslateMode")
-        self.serialPortSend('f')
+        self.serialPortSend('f',"FreeCAD Translate Mode Enabled")
 
     def freeCADRotateMode(self):
         print("freeCADRotateMode")
-        self.serialPortSend('F')
+        self.serialPortSend('F',"FreeCAD Rotate Mode Enabled")
 
     def chopchop3DSlicerTranslateMode(self):
         print("chopchop3DSlicerTranslateMode")
-        self.serialPortSend('d')
+        self.serialPortSend('d',"ChopChop3D Slicer Translate Mode Enabled")
 
     def chopchop3DSlicerRotateMode(self):
         print("chopchop3DSlicerRotate")
-        self.serialPortSend('D')
+        self.serialPortSend('D',"ChopChop3D Slicer Rotate Mode Enabled")
 
     def blenderTranslateMode(self):
         print("blenderTranslateMode")
-        self.serialPortSend('b')
+        self.serialPortSend('b',"Blender Translate Mode Enabled")
 
     def blenderRotateMode(self):
         print("blenderRotateMode")
-        self.serialPortSend('B')
+        self.serialPortSend('B',"Blender Rotate Mode Enabled")
 
     def fusion360TranslateMode(self):
         print("fusion360TranslateMode")
-        self.serialPortSend('u')
+        self.serialPortSend('u',"Fusion360 Translate Mode Enabled")
 
     def fusion360RotateMode(self):
         print("fusion360RotateMode")
-        self.serialPortSend('U')
+        self.serialPortSend('U',"Fusion360 Rotate Mode Enabled")
 
     def zBrushTranslateMode(self):
         print("zBrushTranslateMode")
-        self.serialPortSend('z')
+        self.serialPortSend('z',"zBrush Translate Mode Enabled")
 
     def zBrushScaleMode(self):
         print("zBrushScaleMode")
-        self.serialPortSend('x')
+        self.serialPortSend('x',"zBrush Scale Mode Enabled")
 
     def zBrushRotateMode(self):
         print("zBrushRotateMode")
-        self.serialPortSend('Z')
+        self.serialPortSend('Z',"zBrush Rotate Mode Enabled")
 
     def onSendButton(self):
         print("onSendButton")
         ret = self.ui.serialInput.text();
         print(ret);
-        self.serialPortSend(ret[0]);
+        if ( len(ret) > 0 ):
+            self.serialPortSend(ret[0], None);
+        else:
+            QMessageBox().warning(self, "Nothing to Send", "Please type something to send")
 
     def onRefresh(self):
         print("onRefresh")
