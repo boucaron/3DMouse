@@ -15,6 +15,7 @@ class ControllerDialog(QDialog):
 
 
     ui = None
+    ports = None
     port = None
     portSerial = None
     
@@ -27,10 +28,10 @@ class ControllerDialog(QDialog):
 
     def serialPortSetup(self):
         self.ui.serialPorts.clear()
-        ports = QSerialPortInfo.availablePorts()
+        self.ports = QSerialPortInfo.availablePorts()
         found = False
         multiple = False;
-        for port in ports:
+        for port in self.ports:
             print(port.productIdentifier())
             print(port.vendorIdentifier())
             print(port.portName())
@@ -49,10 +50,35 @@ class ControllerDialog(QDialog):
                     print("Already a 3D Mouse found, skipping")
                     multiple = True
         if ( multiple == True ):
-            QMessageBox().warning(self, "Multiple 3D Mices", "Already connected to a 3D Mouse")
+            QMessageBox().warning(self, "Multiple 3D Mices", "Already connected to a 3D Mouse, Please go in Settings, Select another Port and click on Connect")
         if ( found == False ):
             QMessageBox().warning(self, "No 3D Mouse", "No 3D Mouse Detected, Please go in Settings and click on Refresh")
-                
+
+    def serialPortConnectAtIndex(self, index):
+        if ( self.port == None ):
+            print("No 3DMouse Detected")
+            return
+        self.port = self.ports[ index ]
+        self.portSerial = QSerialPort(self.port)
+        self.portSerial.setBaudRate(QSerialPort.Baud9600)
+        self.portSerial.setDataBits(QSerialPort.Data8)
+        self.portSerial.setParity(QSerialPort.NoParity)
+        self.portSerial.setStopBits(QSerialPort.OneStop)
+        self.portSerial.setFlowControl(QSerialPort.NoFlowControl)
+        self.portSerial.readyRead.connect(self.serialPortRead)
+        ret = self.portSerial.open(QIODevice.ReadWrite)
+        if ( ret == False ):
+            print("Error opening serial port")
+            print(self.portSerial.error())
+            return
+        else:
+            print("Connected to 3DMouse")
+            self.portSerial.setDataTerminalReady(True)
+            self.portSerial.setRequestToSend(True)
+            self.serialPortSend('H')
+            QMessageBox().information(self, "Connected to 3D Mouse", "3D Mouse Detected, Connected")
+        
+            
     def serialPortConnect(self):
         print("Trying to connect to the serialPort")
         if ( self.port == None ):
@@ -110,6 +136,7 @@ class ControllerDialog(QDialog):
         ui.zBrushRotateMode.clicked.connect(self.zBrushRotateMode)
         ui.serialSend.clicked.connect(self.onSendButton)
         ui.refresh.clicked.connect(self.onRefresh)
+        ui.connect.clicked.connect(self.onConnect)
 
     def mouseMode(self):
         print("mouseMode")
@@ -168,6 +195,21 @@ class ControllerDialog(QDialog):
     def onRefresh(self):
         print("onRefresh")
         self.serialPortSetup()
+
+    def onConnect(self):
+        print("onConnect")
+        if ( self.port == None or self.ports == None ):
+            print("No 3D Mouse Detected")
+            return
+        if ( len(self.ports) == 0 ):
+            print("No 3D Mouse Detected")
+            return
+        if ( self.ui.serialPorts.currentIndex() == -1 ):
+            print("No Port Selected")
+            QMessageBox().warning(self, "Select a Port to Connect", "Please Select first a port to connect")
+            return
+        self.serialPortConnectAtIndex(self.ui.serialPorts.currentIndex())
+        
         
 
         
