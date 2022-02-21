@@ -1,7 +1,7 @@
 import sys
 import random
 from PySide6 import QtCore, QtWidgets, QtGui
-from PySide6.QtWidgets import QDialog
+from PySide6.QtWidgets import QDialog, QMessageBox
 from PySide6.QtCore import QObject, SIGNAL, SLOT
 from PySide6.QtSerialPort import QSerialPortInfo, QSerialPort
 from PySide6.QtCore import QIODevice, QByteArray
@@ -28,6 +28,8 @@ class ControllerDialog(QDialog):
     def serialPortSetup(self):
         self.ui.serialPorts.clear()
         ports = QSerialPortInfo.availablePorts()
+        found = False
+        multiple = False;
         for port in ports:
             print(port.productIdentifier())
             print(port.vendorIdentifier())
@@ -40,8 +42,16 @@ class ControllerDialog(QDialog):
                 print(">>")
                 self.port = port
                 self.ui.serialPorts.addItem(self.port.portName(), self.port)
-                # Test 
-                self.serialPortConnect()
+                if ( found == False ):
+                    self.serialPortConnect()
+                    found = True
+                else:
+                    print("Already a 3D Mouse found, skipping")
+                    multiple = True
+        if ( multiple == True ):
+            QMessageBox().warning(self, "Multiple 3D Mices", "Already connected to a 3D Mouse")
+        if ( found == False ):
+            QMessageBox().warning(self, "No 3D Mouse", "No 3D Mouse Detected, Please go in Settings and click on Refresh")
                 
     def serialPortConnect(self):
         print("Trying to connect to the serialPort")
@@ -65,6 +75,7 @@ class ControllerDialog(QDialog):
             self.portSerial.setDataTerminalReady(True)
             self.portSerial.setRequestToSend(True)
             self.serialPortSend('H')
+            QMessageBox().information(self, "Connected to 3D Mouse", "3D Mouse Detected, Connected")
         
     def serialPortRead(self):
         print("serialPortRead")
@@ -98,6 +109,7 @@ class ControllerDialog(QDialog):
         ui.zBrushScaleMode.clicked.connect(self.zBrushScaleMode)
         ui.zBrushRotateMode.clicked.connect(self.zBrushRotateMode)
         ui.serialSend.clicked.connect(self.onSendButton)
+        ui.refresh.clicked.connect(self.onRefresh)
 
     def mouseMode(self):
         print("mouseMode")
@@ -152,6 +164,11 @@ class ControllerDialog(QDialog):
         ret = self.ui.serialInput.text();
         print(ret);
         self.serialPortSend(ret[0]);
+
+    def onRefresh(self):
+        print("onRefresh")
+        self.serialPortSetup()
+        
 
         
 
