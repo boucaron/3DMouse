@@ -36,6 +36,79 @@ void zBrushConfiguration(int);
 void fusion360Configuration(bool);
 
 
+
+
+struct  MouseState {
+  byte UpX, DownX;
+  byte UpY, DownY;
+  byte UpZ, DownZ;
+  byte ButtonZ;
+  int RotateZ;
+
+
+  int YZero, XZero;
+  int offsetJoyX, offsetJoyY;
+  int XValue, YValue;
+  int XSens, YSens;
+
+ 
+
+
+  // Move performed before releasing
+//   int x,y;
+
+  void reset() {
+    UpX = 0 ; DownX = 0;
+    UpY = 0 ; DownY = 0;
+    UpZ = 0 ; DownZ = 0;
+    ButtonZ = 0 ;
+    RotateZ = 0;
+    XSens = 0; YSens = 0;
+
+   
+    offsetJoyX = 5;    // set this value if the joystick moves by itself : 15
+    offsetJoyY = 5;    // set this value if the joystick moves by itself : 15
+
+
+  }
+
+  void setup() {
+    reset();
+    YZero = 0; XZero = 0;
+    YZero = analogRead(vertPin);
+    XZero = analogRead(horzPin);
+   
+ /*   x = 0;
+    y = 0; */
+  }
+
+
+  void print() {
+    Serial.println("State:");
+    Serial.print("UpX:"); Serial.print(UpX); Serial.println();
+    Serial.print("DownX:"); Serial.print(DownX); Serial.println();
+    Serial.print("UpY:"); Serial.print(UpY); Serial.println();
+    Serial.print("DownY:"); Serial.print(DownY); Serial.println();
+    Serial.print("UpZ:"); Serial.print(UpZ); Serial.println();
+    Serial.print("DownZ:"); Serial.print(DownZ); Serial.println();
+    Serial.print("ButtonZ:"); Serial.print(ButtonZ); Serial.println();
+    Serial.print("RotateZ:"); Serial.print(RotateZ); Serial.println();
+    Serial.print("XZero:"); Serial.print(XZero); Serial.println();
+    Serial.print("YZero:"); Serial.print(YZero); Serial.println();    
+    Serial.print("OffsetJoyX"); Serial.print(offsetJoyX); Serial.println();
+    Serial.print("OffsetJoyY"); Serial.print(offsetJoyY); Serial.println();
+    Serial.print("XValue:"); Serial.print(XValue); Serial.println();
+    Serial.print("YValue:"); Serial.print(YValue); Serial.println();
+    Serial.print("XSens:"); Serial.print(XSens); Serial.println();
+    Serial.print("YSens:"); Serial.print(YSens); Serial.println();
+  }
+
+
+
+};
+
+
+
 enum MouseKeyHIDMode {
   NOTSET,
   KEYBOARD_PRESS,
@@ -109,7 +182,7 @@ struct MouseKeyHID {
     }    
   }
 
-  void writeHID(byte up, int XSens, int YSens) {
+  void writeHID(byte up, int XSens, int YSens, MouseState &mouseState) {
     if ( up != 0 ) {
       switch ( mode ) {       
         case KEYBOARD_PRESS:
@@ -129,13 +202,25 @@ struct MouseKeyHID {
               // Serial.println("Mouse press");            
           }
           Mouse.move(data.mouse.xAxis * XSens, data.mouse.yAxis * YSens, data.mouse.wheel);
-         //  Serial.println("Mouse move = "); Serial.print(data.mouse.xAxis * XSens);
+          // DEBUG
+          // Serial.println("Mouse move = X  "); Serial.print(data.mouse.xAxis * XSens);
+          // Serial.println("Mouse move = Y  "); Serial.print(data.mouse.yAxis * YSens);
+          // mouseState.x += data.mouse.xAxis * XSens;
+          // mouseState.y += data.mouse.yAxis * YSens;
+          // Serial.println( mouseState.x);
           break;
         case MOUSE_RELEASE:
           if ( data.mouse.mouseButton != 0 ) {
             Mouse.release(data.mouse.mouseButton);
+            // DEBUG
+            // Serial.println("Mouse release");     
           }
           Mouse.move(data.mouse.xAxis * XSens, data.mouse.yAxis * YSens, data.mouse.wheel);
+          // DEBUG
+          // Serial.println("Mouse move = X "); Serial.print(data.mouse.xAxis * XSens);
+          // Serial.println("Mouse move = Y  "); Serial.print(data.mouse.yAxis * YSens);
+          // mouseState.x += data.mouse.xAxis * XSens;
+          // mouseState.y += data.mouse.yAxis * YSens;
           break;
       }
      
@@ -150,69 +235,6 @@ struct MouseKeyHID {
 
 };
 
-
-struct  MouseState {
-  byte UpX, DownX;
-  byte UpY, DownY;
-  byte UpZ, DownZ;
-  byte ButtonZ;
-  int RotateZ;
-
-
-  int YZero, XZero;
-  int offsetJoyX, offsetJoyY;
-  int XValue, YValue;
-  int XSens, YSens;
-
-  // If already released, prevent a loop annoying for debug
-  int mouseReleased;
-
-  void reset() {
-    UpX = 0 ; DownX = 0;
-    UpY = 0 ; DownY = 0;
-    UpZ = 0 ; DownZ = 0;
-    ButtonZ = 0 ;
-    RotateZ = 0;
-    XSens = 0; YSens = 0;
-
-   
-    offsetJoyX = 5;    // set this value if the joystick moves by itself : 15
-    offsetJoyY = 5;    // set this value if the joystick moves by itself : 15
-
-  }
-
-  void setup() {
-    reset();
-    YZero = 0; XZero = 0;
-    YZero = analogRead(vertPin);
-    XZero = analogRead(horzPin);
-    mouseReleased = 0;
-  }
-
-
-  void print() {
-    Serial.println("State:");
-    Serial.print("UpX:"); Serial.print(UpX); Serial.println();
-    Serial.print("DownX:"); Serial.print(DownX); Serial.println();
-    Serial.print("UpY:"); Serial.print(UpY); Serial.println();
-    Serial.print("DownY:"); Serial.print(DownY); Serial.println();
-    Serial.print("UpZ:"); Serial.print(UpZ); Serial.println();
-    Serial.print("DownZ:"); Serial.print(DownZ); Serial.println();
-    Serial.print("ButtonZ:"); Serial.print(ButtonZ); Serial.println();
-    Serial.print("RotateZ:"); Serial.print(RotateZ); Serial.println();
-    Serial.print("XZero:"); Serial.print(XZero); Serial.println();
-    Serial.print("YZero:"); Serial.print(YZero); Serial.println();    
-    Serial.print("OffsetJoyX"); Serial.print(offsetJoyX); Serial.println();
-    Serial.print("OffsetJoyY"); Serial.print(offsetJoyY); Serial.println();
-    Serial.print("XValue:"); Serial.print(XValue); Serial.println();
-    Serial.print("YValue:"); Serial.print(YValue); Serial.println();
-    Serial.print("XSens:"); Serial.print(XSens); Serial.println();
-    Serial.print("YSens:"); Serial.print(YSens); Serial.println();
-  }
-
-
-
-};
 
 
 // STATIC BUFFER CONTAININGALL THE CONF
@@ -245,12 +267,12 @@ struct MouseKeyConf {
     }
   }
 
-  void writeHID(byte up, int XSens, int YSens) {
+  void writeHID(byte up, int XSens, int YSens, MouseState &mouseState) {
     if ( from == -1 || to == -1 ) {
       return;
     } else {
       for(int i = from ; i < to ; i++ ) {
-        mouseBuf[i].writeHID(up, XSens, YSens);
+        mouseBuf[i].writeHID(up, XSens, YSens, mouseState);
       }
     }
   }
@@ -303,7 +325,7 @@ struct MouseConf {
 
   
 
-  void checkAndReleaseMouseButton(byte mouseButton, const MouseState &state, const MouseState &previousState) {
+  void checkAndReleaseMouseButton(byte mouseButton, MouseState &state, const MouseState &previousState) {
     if ( state.UpX == 0 && state.UpY == 0 && state.UpZ == 0 && 
          state.DownX == 0 && state.DownY == 0 && state.DownZ == 0 && 
          state.ButtonZ == 0 && state.RotateZ == 0 ) { 
@@ -313,12 +335,18 @@ struct MouseConf {
             Mouse.release(mouseButton);
             // DEBUG
             // Serial.println("Mouse release button = ");
-            // Serial.println(mouseButton);
+            // Serial.println(mouseButton);    
+
+            // DEBUG
+            //Serial.println("checkAndReleaseMouseButton X = "); Serial.println(state.x);
+            //Serial.println("Y = "); Serial.println(state.y);
+            //state.x = 0;
+            // state.y = 0;        
           }      
          }
   }
   
-  void checkAndReleaseKeyboard(const MouseState &state, const MouseState &previousState) {
+  void checkAndReleaseKeyboard(MouseState &state, const MouseState &previousState) {
     if ( state.UpX == 0 && state.UpY == 0 && state.UpZ == 0 && 
          state.DownX == 0 && state.DownY == 0 && state.DownZ == 0 && 
          state.ButtonZ == 0 && state.RotateZ == 0 ) { 
@@ -348,25 +376,25 @@ struct MouseConf {
     return false;
   }
 
-  void writeHID(const MouseState &state, MouseState &previousState) {    
+  void writeHID(MouseState &state, MouseState &previousState) {    
 
     if ( atLeastAMove(state) ) {
-      before.writeHID(1, state.XSens, state.YSens);
+      before.writeHID(1, state.XSens, state.YSens, state);
     }
     
-    UpX.writeHID(state.UpX, state.XSens, state.YSens); 
-    DownX.writeHID(state.DownX, state.XSens, state.YSens);
-    UpY.writeHID(state.UpY, state.XSens, state.YSens);
-    DownY.writeHID(state.DownY, state.XSens, state.YSens);
-    UpZ.writeHID(state.UpZ, state.XSens, state.YSens); 
-    DownZ.writeHID(state.DownZ, state.XSens, state.YSens);
+    UpX.writeHID(state.UpX, state.XSens, state.YSens, state); 
+    DownX.writeHID(state.DownX, state.XSens, state.YSens, state);
+    UpY.writeHID(state.UpY, state.XSens, state.YSens, state);
+    DownY.writeHID(state.DownY, state.XSens, state.YSens, state);
+    UpZ.writeHID(state.UpZ, state.XSens, state.YSens, state); 
+    DownZ.writeHID(state.DownZ, state.XSens, state.YSens, state);
 
       
-    ButtonZ.writeHID(state.ButtonZ, state.XSens, state.YSens);
-    RotateZ.writeHID(state.RotateZ, state.XSens, state.YSens);
+    ButtonZ.writeHID(state.ButtonZ, state.XSens, state.YSens, state);
+    RotateZ.writeHID(state.RotateZ, state.XSens, state.YSens, state);
 
     if ( atLeastAMove(state) ) {
-      after.writeHID(1, state.XSens, state.YSens);
+      after.writeHID(1, state.XSens, state.YSens, state);
     }
 
 
@@ -381,12 +409,29 @@ struct MouseConf {
        delay(100);
     }
 
-    // Small delay for lower speed
-    if ( (state.XSens >= 1 && state.XSens <= 3) || (state.YSens <= 3 && state.YSens >= 1)  ) {
-      if ( state.UpX != 0 || state.DownX != 0 || state.UpY != 0 || state.DownY != 0 ) {
-        delay(10); // Basic Mouse        
+    // 3 Stages delay, small sensitivity very slow and faster    
+    bool taken = false;
+    if ( state.XSens > 6 || state.YSens > 6   ) {
+      if ( !taken && (state.UpX != 0 || state.DownX != 0 || state.UpY != 0 || state.DownY != 0) ) {
+        delay(3); 
+        taken = true;   
       }
     } 
+    if (  (state.XSens > 3 && state.XSens <= 6 ) || (state.YSens > 3 && state.YSens <= 6)  ) {
+      if ( !taken && (state.UpX != 0 || state.DownX != 0 || state.UpY != 0 || state.DownY != 0) ) {
+        delay(5); 
+        taken = true;      
+      }
+    } 
+    if ( (state.XSens >= 1 && state.XSens <= 3) || (state.YSens <= 3 && state.YSens >= 1)  ) {
+      if (  !taken && (state.UpX != 0 || state.DownX != 0 || state.UpY != 0 || state.DownY != 0 )) {
+        delay(10); // Basic Mouse        
+        taken = true;
+      }
+    } 
+    
+    
+  
 
     previousState = state;
     
@@ -424,8 +469,6 @@ void helpCommand() {
   Serial.println("S: shows current mouse state");
   Serial.println("C: shows current mouse configuration");
   Serial.println("R: read mouse configuration");
-  Serial.println("T: dummy test mouse move");
-  Serial.println("t: dummy test keyboard type");
   Serial.println("f: FreeCAD Translate Mouse Configuration");
   Serial.println("F: FreeCAD Rotate Mouse Configuration");
   Serial.println("m: Basic Mouse Configuration");
@@ -463,13 +506,7 @@ void readSerialPort() {
         break;
       case 'R':
         mouseConf.read();
-        break;
-      case 'T':
-        mouseTest();
-        break;
-      case 't':
-        keyboardTest();
-        break;
+        break;     
       case 'f': // Translate
         Serial.println("FreeCAD Translate Mode");
         freecadConfiguration(false);
@@ -591,67 +628,6 @@ void writeHID() {
   mouseConf.writeHID(mouseState, previousMouseState);
 }
 
-// Simple mouse test
-void mouseTest() {
-  mouseState.reset();
-  mouseState.UpX = 1;
-  mouseState.XSens = 1;
-  mouseState.YSens = 1;
-  mouseConf.UpX.from = 0;
-  mouseConf.UpX.to = 1;
-  mouseBuf[0].mode = MOUSE_PRESS;  
-  mouseBuf[0].data.mouse.mouseButton = 0;
-  mouseBuf[0].data.mouse.xAxis = 100;
-  mouseBuf[0].data.mouse.yAxis = 0;
-  mouseBuf[0].data.mouse.wheel = 0;
-  writeHID();
-  
-  Serial.println("mouseTest()");
-}
-
-
-// Simple keyboard test
-void keyboardTest() {
-
- Keyboard.write('a');
- Keyboard.write('b');
- Keyboard.write('c');
- Keyboard.write('V');
- Keyboard.write('V');
- Serial.println("keyboardTest()");
-  
-}
-
-
-void mouseKeyboardTest() {
-  mouseState.reset();
-
- mouseConf.before.from = -1;
- mouseConf.before.to = -1;
- mouseConf.after.from = -1;
- mouseConf.after.to = -1;
-  
-  mouseState.UpX = 1;
-  mouseState.XSens = 1;
-  mouseState.YSens = 1;
-  mouseConf.UpX.from = 0;
-  mouseConf.UpX.to = 3;
-  mouseBuf[0].mode =  KEYBOARD_PRESS; 
-  mouseBuf[0].data.keyboard.keyboardCode = KEY_LEFT_SHIFT;  
-  mouseBuf[1].mode = MOUSE_PRESS;  
-  mouseBuf[1].data.mouse.mouseButton = 0;
-  mouseBuf[1].data.mouse.xAxis = 10;
-  mouseBuf[1].data.mouse.yAxis = 0;
-  mouseBuf[1].data.mouse.wheel = 0;
-  mouseBuf[2].mode =  KEYBOARD_PRESS; 
-  mouseBuf[2].data.keyboard.keyboardCode = 'a';  
-    
-  writeHID();
-  Keyboard.releaseAll();
-  Serial.println("mouseKeyboardTest()");
-  
-  
-}
 
 // FreeCAD mouse test : CAD Mode
 // Translate: Hold Middle Button, Move, Then Release when back on center
@@ -717,8 +693,8 @@ void freecadConfiguration(bool rotate) {
     mouseConf.before.to = 7;
   }
   else {
-    mouseConf.before.from = -1;
-    mouseConf.before.to = -1;
+    mouseConf.before.from = 5;
+    mouseConf.before.to = 6;
   }
   mouseBuf[5].mode=  MOUSE_PRESS; 
   mouseBuf[5].data.mouse.xAxis = 0;
@@ -731,6 +707,9 @@ void freecadConfiguration(bool rotate) {
   mouseBuf[6].data.mouse.wheel = 0;  
   mouseBuf[6].data.mouse.mouseButton = MOUSE_LEFT;
 }
+
+
+
 
 
 // Basic Mouse Configuration
