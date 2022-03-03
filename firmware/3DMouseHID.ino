@@ -764,43 +764,32 @@ void basicMouseConfiguration() {
   
   mouseConf.UpX.from = 0; 
   mouseConf.UpX.to = 1;
+  mouseBuf[0].cleanData();
   mouseBuf[0].mode =  MOUSE_PRESS;  
   mouseBuf[0].data.mouse.xAxis = 1;
-  mouseBuf[0].data.mouse.yAxis = 0;
-  mouseBuf[0].data.mouse.wheel = 0;
-  mouseBuf[0].data.mouse.mouseButton =  0;
-
+  
   mouseConf.DownX.from = 1;
   mouseConf.DownX.to = 2;
+  mouseBuf[1].cleanData();
   mouseBuf[1].mode =  MOUSE_PRESS;  
   mouseBuf[1].data.mouse.xAxis = -1;
-  mouseBuf[1].data.mouse.yAxis = 0;
-  mouseBuf[1].data.mouse.wheel = 0; 
-  mouseBuf[1].data.mouse.mouseButton =  0;
-
-
+  
   mouseConf.UpY.from = 2;
   mouseConf.UpY.to = 3;
-  mouseBuf[2].mode =  MOUSE_PRESS;  
-  mouseBuf[2].data.mouse.xAxis = 0;
+  mouseBuf[2].cleanData();
+  mouseBuf[2].mode =  MOUSE_PRESS;    
   mouseBuf[2].data.mouse.yAxis = -1;
-  mouseBuf[2].data.mouse.wheel = 0;
-  mouseBuf[2].data.mouse.mouseButton =  0;
 
   mouseConf.DownY.from = 3;
   mouseConf.DownY.to = 4;
-  mouseBuf[3].mode =  MOUSE_PRESS; 
-  mouseBuf[3].data.mouse.xAxis = 0;
+  mouseBuf[3].cleanData();
+  mouseBuf[3].mode =  MOUSE_PRESS;   
   mouseBuf[3].data.mouse.yAxis = 1;
-  mouseBuf[3].data.mouse.wheel = 0;
-  mouseBuf[3].data.mouse.mouseButton =  0;
 
   mouseConf.ButtonZ.from = 4;
   mouseConf.ButtonZ.to = 5;
+  mouseBuf[4].cleanData();
   mouseBuf[4].mode=  MOUSE_PRESS; 
-  mouseBuf[4].data.mouse.xAxis = 0;
-  mouseBuf[4].data.mouse.yAxis = 0;
-  mouseBuf[4].data.mouse.wheel = 0;  
   mouseBuf[4].data.mouse.mouseButton = MOUSE_LEFT;
 
 }
