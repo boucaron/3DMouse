@@ -183,6 +183,7 @@ struct MouseKeyHID {
   }
 
   void writeHID(byte up, int XSens, int YSens, MouseState &mouseState) {
+    
     if ( up != 0 ) {
       switch ( mode ) {       
         case KEYBOARD_PRESS:
@@ -200,11 +201,12 @@ struct MouseKeyHID {
               Mouse.press(data.mouse.mouseButton);  
               // DEBUG
               // Serial.println("Mouse press");            
-          }
+          }                
           Mouse.move(data.mouse.xAxis * XSens, data.mouse.yAxis * YSens, data.mouse.wheel);
+           
           // DEBUG
-          // Serial.println("Mouse move = X  "); Serial.print(data.mouse.xAxis * XSens);
-          // Serial.println("Mouse move = Y  "); Serial.print(data.mouse.yAxis * YSens);
+          //Serial.print("Mouse move = X  "); Serial.println(data.mouse.xAxis * XSens);
+          // Serial.print("Mouse move = Y  "); Serial.println(data.mouse.yAxis * YSens);
           // mouseState.x += data.mouse.xAxis * XSens;
           // mouseState.y += data.mouse.yAxis * YSens;
           // Serial.println( mouseState.x);
@@ -214,8 +216,8 @@ struct MouseKeyHID {
             Mouse.release(data.mouse.mouseButton);
             // DEBUG
             // Serial.println("Mouse release");     
-          }
-          Mouse.move(data.mouse.xAxis * XSens, data.mouse.yAxis * YSens, data.mouse.wheel);
+          }          
+          Mouse.move(data.mouse.xAxis * XSens, data.mouse.yAxis * YSens, data.mouse.wheel);          
           // DEBUG
           // Serial.println("Mouse move = X "); Serial.print(data.mouse.xAxis * XSens);
           // Serial.println("Mouse move = Y  "); Serial.print(data.mouse.yAxis * YSens);
@@ -320,30 +322,31 @@ struct MouseConf {
     UpZ.read(); DownZ.read();
     ButtonZ.read(); RotateZ.read();    
     before.read(); after.read();
-  }
-
-
+  } 
   
 
-  void checkAndReleaseMouseButton(byte mouseButton, MouseState &state, const MouseState &previousState) {
+  void checkAndReleaseMouseButtons(MouseState &state, const MouseState &previousState) {
     if ( state.UpX == 0 && state.UpY == 0 && state.UpZ == 0 && 
          state.DownX == 0 && state.DownY == 0 && state.DownZ == 0 && 
          state.ButtonZ == 0 && state.RotateZ == 0 ) { 
           if ( previousState.UpX != 0 || previousState.UpY != 0 || previousState.UpZ != 0 || 
                 previousState.DownX != 0 || previousState.DownY != 0 || previousState.DownZ != 0 || 
                 previousState.ButtonZ != 0 || previousState.RotateZ !=  0 ) {         
-            Mouse.release(mouseButton);
+            Mouse.release(MOUSE_LEFT|MOUSE_MIDDLE|MOUSE_RIGHT);
             // DEBUG
             // Serial.println("Mouse release button = ");
+            // DEBOUNCE TEST: HELP FOR FREECAD
+            // delay(100);
+            
             // Serial.println(mouseButton);    
-
+          
             // DEBUG
-            //Serial.println("checkAndReleaseMouseButton X = "); Serial.println(state.x);
+            // Serial.println("checkAndReleaseMouseButton X = "); // Serial.println(state.x);
             //Serial.println("Y = "); Serial.println(state.y);
             //state.x = 0;
-            // state.y = 0;        
+            // state.y = 0;                    
           }      
-         }
+         }     
   }
   
   void checkAndReleaseKeyboard(MouseState &state, const MouseState &previousState) {
@@ -355,9 +358,10 @@ struct MouseConf {
                 previousState.ButtonZ != 0 || previousState.RotateZ !=  0 ) {                                  
             Keyboard.releaseAll();    
             // DEBUG
-            // Serial.println("Keyboard.releaseAll()");
+            // Serial.println("checkAndReleaseKeyboard Keyboard.releaseAll()");
+       
             }      
-         }
+         }    
   } 
 
   bool atLeastAMove(const MouseState &state ) {
@@ -380,58 +384,53 @@ struct MouseConf {
 
     if ( atLeastAMove(state) ) {
       before.writeHID(1, state.XSens, state.YSens, state);
-    }
+   
     
-    UpX.writeHID(state.UpX, state.XSens, state.YSens, state); 
-    DownX.writeHID(state.DownX, state.XSens, state.YSens, state);
-    UpY.writeHID(state.UpY, state.XSens, state.YSens, state);
-    DownY.writeHID(state.DownY, state.XSens, state.YSens, state);
-    UpZ.writeHID(state.UpZ, state.XSens, state.YSens, state); 
-    DownZ.writeHID(state.DownZ, state.XSens, state.YSens, state);
+      UpX.writeHID(state.UpX, state.XSens, state.YSens, state); 
+      DownX.writeHID(state.DownX, state.XSens, state.YSens, state);
+      UpY.writeHID(state.UpY, state.XSens, state.YSens, state);
+      DownY.writeHID(state.DownY, state.XSens, state.YSens, state);
+      UpZ.writeHID(state.UpZ, state.XSens, state.YSens, state); 
+      DownZ.writeHID(state.DownZ, state.XSens, state.YSens, state);
 
       
-    ButtonZ.writeHID(state.ButtonZ, state.XSens, state.YSens, state);
-    RotateZ.writeHID(state.RotateZ, state.XSens, state.YSens, state);
+      ButtonZ.writeHID(state.ButtonZ, state.XSens, state.YSens, state);
+      RotateZ.writeHID(state.RotateZ, state.XSens, state.YSens, state);
 
-    if ( atLeastAMove(state) ) {
+    
       after.writeHID(1, state.XSens, state.YSens, state);
-    }
-
-
-    checkAndReleaseMouseButton(MOUSE_LEFT, state, previousState);
-    checkAndReleaseMouseButton(MOUSE_RIGHT, state, previousState);
-    checkAndReleaseMouseButton(MOUSE_MIDDLE, state, previousState);
-    checkAndReleaseKeyboard(state, previousState);
-    
-
+   
      // Debounce
-    if ( atLeastAButtonPressed(state) ) {
-       delay(100);
-    }
+      if ( atLeastAButtonPressed(state) ) {
+         delay(100);
+      }
 
-    // 3 Stages delay, small sensitivity very slow and faster    
-    bool taken = false;
-    if ( state.XSens > 6 || state.YSens > 6   ) {
-      if ( !taken && (state.UpX != 0 || state.DownX != 0 || state.UpY != 0 || state.DownY != 0) ) {
-        delay(3); 
-        taken = true;   
-      }
-    } 
-    if (  (state.XSens > 3 && state.XSens <= 6 ) || (state.YSens > 3 && state.YSens <= 6)  ) {
-      if ( !taken && (state.UpX != 0 || state.DownX != 0 || state.UpY != 0 || state.DownY != 0) ) {
-        delay(5); 
-        taken = true;      
-      }
-    } 
-    if ( (state.XSens >= 1 && state.XSens <= 3) || (state.YSens <= 3 && state.YSens >= 1)  ) {
-      if (  !taken && (state.UpX != 0 || state.DownX != 0 || state.UpY != 0 || state.DownY != 0 )) {
-        delay(10); // Basic Mouse        
-        taken = true;
-      }
-    } 
+      //  3 Stages delay, small sensitivity very slow and faster    
+      bool taken = false;
+      if ( state.XSens > 6 || state.YSens > 6   ) {
+        if ( !taken && (state.UpX != 0 || state.DownX != 0 || state.UpY != 0 || state.DownY != 0) ) {
+          delay(3); 
+          taken = true;   
+        }
+      } 
+      if (  (state.XSens > 3 && state.XSens <= 6 ) || (state.YSens > 3 && state.YSens <= 6)  ) {
+        if ( !taken && (state.UpX != 0 || state.DownX != 0 || state.UpY != 0 || state.DownY != 0) ) {
+          delay(5); 
+          taken = true;      
+        }
+      } 
+      if ( (state.XSens >= 1 && state.XSens <= 3) || (state.YSens <= 3 && state.YSens >= 1)  ) {
+        if (  !taken && (state.UpX != 0 || state.DownX != 0 || state.UpY != 0 || state.DownY != 0 )) {
+          delay(10); // Basic Mouse        
+          taken = true;
+       }
+      } 
     
-    
-  
+    }
+    else {
+      checkAndReleaseMouseButtons(state, previousState);
+      checkAndReleaseKeyboard(state, previousState);
+    }
 
     previousState = state;
     
@@ -580,18 +579,30 @@ void readMouse() {
   if ( mouseState.YValue -  mouseState.YZero < -mouseState.offsetJoyY ) {
     mouseState.UpY = 1; mouseState.DownY = 0;    
     mouseState.YSens = (mouseState.YZero - mouseState.YValue) / myDiv;
+    if ( mouseState.YSens == 0 ) {
+      mouseState.UpY = 0;
+    }
   }
   if (mouseState.YValue - mouseState.YZero > mouseState.offsetJoyY ) {
     mouseState.UpY = 0; mouseState.DownY = 1;
     mouseState.YSens = (mouseState.YValue -  mouseState.YZero) / myDiv;
+    if ( mouseState.YSens == 0 ) {
+      mouseState.DownY = 0;
+    }
   }
   if ( mouseState.XValue -  mouseState.XZero < -mouseState.offsetJoyX ) {
     mouseState.UpX = 1; mouseState.DownX = 0;    
     mouseState.XSens = (mouseState.XZero - mouseState.XValue) / myDiv;
+    if ( mouseState.XSens == 0 ) {
+      mouseState.UpX = 0;
+    }
   }
   if ( mouseState.XValue -  mouseState.XZero > mouseState.offsetJoyX ) {
     mouseState.UpX = 0; mouseState.DownX = 1;
     mouseState.XSens = (mouseState.XValue -  mouseState.XZero) / myDiv;
+     if ( mouseState.XSens == 0 ) {
+      mouseState.DownX = 0;
+    }
   }
   if (digitalRead(joyButt) == HIGH) {
     mouseState.ButtonZ = 0;
