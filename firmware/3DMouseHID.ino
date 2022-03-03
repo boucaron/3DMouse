@@ -120,10 +120,12 @@ enum MouseKeyHIDMode {
 struct MouseHIDData {
   uint8_t mouseButton;
   int8_t xAxis, yAxis, wheel;
+  void (*callback) ();
 };
 
 struct KeyHIDData {
   uint8_t keyboardCode;
+  void (*callback) ();
 };
 
 union HIDData {
@@ -190,11 +192,13 @@ struct MouseKeyHID {
           Keyboard.press(data.keyboard.keyboardCode); 
               // DEBUG
              // Serial.println("Keyboard press");   
+             if ( data.keyboard.callback != NULL ) { data.keyboard.callback(); }
           break;
         case KEYBOARD_RELEASE:
           Keyboard.release(data.keyboard.keyboardCode); 
           // DEBUG
-          // Serial.println("Keyboard release");   
+          // Serial.println("Keyboard release");
+          if ( data.keyboard.callback != NULL ) { data.keyboard.callback(); }   
           break;
         case MOUSE_PRESS: 
           if ( data.mouse.mouseButton != 0 ) {
@@ -210,6 +214,8 @@ struct MouseKeyHID {
           // mouseState.x += data.mouse.xAxis * XSens;
           // mouseState.y += data.mouse.yAxis * YSens;
           // Serial.println( mouseState.x);
+
+          if ( data.mouse.callback != NULL ) { data.mouse.callback(); }
           break;
         case MOUSE_RELEASE:
           if ( data.mouse.mouseButton != 0 ) {
@@ -217,12 +223,13 @@ struct MouseKeyHID {
             // DEBUG
             // Serial.println("Mouse release");     
           }          
-          Mouse.move(data.mouse.xAxis * XSens, data.mouse.yAxis * YSens, data.mouse.wheel);          
+          Mouse.move(data.mouse.xAxis * XSens, data.mouse.yAxis * YSens, data.mouse.wheel);                   
           // DEBUG
           // Serial.println("Mouse move = X "); Serial.print(data.mouse.xAxis * XSens);
           // Serial.println("Mouse move = Y  "); Serial.print(data.mouse.yAxis * YSens);
           // mouseState.x += data.mouse.xAxis * XSens;
           // mouseState.y += data.mouse.yAxis * YSens;
+          if ( data.mouse.callback != NULL ) { data.mouse.callback(); }
           break;
       }
      
@@ -231,6 +238,24 @@ struct MouseKeyHID {
 
   void reset() {
     mode = NOTSET;
+  }
+
+  void cleanData() {
+    switch(mode) {
+      case KEYBOARD_PRESS:                  
+      case KEYBOARD_RELEASE:       
+          data.keyboard.keyboardCode = 0;
+          data.keyboard.callback = NULL;
+         break;
+      case MOUSE_PRESS:  
+      case MOUSE_RELEASE:
+          data.mouse.mouseButton = 0;
+          data.mouse.xAxis = 0;
+          data.mouse.yAxis = 0;
+          data.mouse.wheel = 0;
+          data.mouse.callback = NULL;
+         break;
+    }
   }
 
 
@@ -640,6 +665,19 @@ void writeHID() {
 }
 
 
+
+
+
+void freecadSwitchMode() {
+  Serial.println("freecadSwitchMode");
+  if ( mouseBuf[0].data.mouse.mouseButton == MOUSE_MIDDLE ) {   
+    freecadConfiguration(true);
+  } else {
+    freecadConfiguration(false);
+  }
+  delay(250);
+}
+
 // FreeCAD mouse test : CAD Mode
 // Translate: Hold Middle Button, Move, Then Release when back on center
 // Rotate: Hold Middle then Left Button (not both together), Move, Then Release when back on center
@@ -660,44 +698,39 @@ void freecadConfiguration(bool rotate) {
    
   mouseConf.UpX.from = 0; 
   mouseConf.UpX.to = 1;
+  mouseBuf[0].cleanData();
   mouseBuf[0].mode =  MOUSE_PRESS;  
-  mouseBuf[0].data.mouse.xAxis = 1;
-  mouseBuf[0].data.mouse.yAxis = 0;
-  mouseBuf[0].data.mouse.wheel = 0;
+  mouseBuf[0].data.mouse.xAxis = 1; 
   mouseBuf[0].data.mouse.mouseButton =  MOUSE_MIDDLE | rotateB;
 
   mouseConf.DownX.from = 1;
   mouseConf.DownX.to = 2;
+  mouseBuf[1].cleanData();
   mouseBuf[1].mode =  MOUSE_PRESS;  
-  mouseBuf[1].data.mouse.xAxis = -1;
-  mouseBuf[1].data.mouse.yAxis = 0;
-  mouseBuf[1].data.mouse.wheel = 0; 
+  mouseBuf[1].data.mouse.xAxis = -1; 
   mouseBuf[1].data.mouse.mouseButton =  MOUSE_MIDDLE | rotateB;
 
 
   mouseConf.UpY.from = 2;
   mouseConf.UpY.to = 3;
-  mouseBuf[2].mode =  MOUSE_PRESS;  
-  mouseBuf[2].data.mouse.xAxis = 0;
-  mouseBuf[2].data.mouse.yAxis = -1;
-  mouseBuf[2].data.mouse.wheel = 0;
+  mouseBuf[2].cleanData();
+  mouseBuf[2].mode =  MOUSE_PRESS;    
+  mouseBuf[2].data.mouse.yAxis = -1;  
   mouseBuf[2].data.mouse.mouseButton =  MOUSE_MIDDLE | rotateB;
 
   mouseConf.DownY.from = 3;
   mouseConf.DownY.to = 4;
+  mouseBuf[3].cleanData();
   mouseBuf[3].mode =  MOUSE_PRESS; 
-  mouseBuf[3].data.mouse.xAxis = 0;
-  mouseBuf[3].data.mouse.yAxis = 1;
-  mouseBuf[3].data.mouse.wheel = 0;
+  mouseBuf[3].data.mouse.yAxis = 1;  
   mouseBuf[3].data.mouse.mouseButton =   MOUSE_MIDDLE | rotateB;
 
   mouseConf.ButtonZ.from = 4;
   mouseConf.ButtonZ.to = 5;
-  mouseBuf[4].mode=  MOUSE_PRESS; 
-  mouseBuf[4].data.mouse.xAxis = 0;
-  mouseBuf[4].data.mouse.yAxis = 0;
-  mouseBuf[4].data.mouse.wheel = 0;  
+  mouseBuf[4].cleanData();
+  mouseBuf[4].mode =  MOUSE_PRESS; 
   mouseBuf[4].data.mouse.mouseButton = MOUSE_LEFT;
+  mouseBuf[4].data.mouse.callback = freecadSwitchMode;
 
   if ( rotate != false )  {
     mouseConf.before.from = 5;
@@ -707,15 +740,11 @@ void freecadConfiguration(bool rotate) {
     mouseConf.before.from = 5;
     mouseConf.before.to = 6;
   }
-  mouseBuf[5].mode=  MOUSE_PRESS; 
-  mouseBuf[5].data.mouse.xAxis = 0;
-  mouseBuf[5].data.mouse.yAxis = 0;
-  mouseBuf[5].data.mouse.wheel = 0;  
+  mouseBuf[5].cleanData();
+  mouseBuf[5].mode=  MOUSE_PRESS;  
   mouseBuf[5].data.mouse.mouseButton = MOUSE_MIDDLE;
+  mouseBuf[6].cleanData();
   mouseBuf[6].mode=  MOUSE_PRESS; 
-  mouseBuf[6].data.mouse.xAxis = 0;
-  mouseBuf[6].data.mouse.yAxis = 0;
-  mouseBuf[6].data.mouse.wheel = 0;  
   mouseBuf[6].data.mouse.mouseButton = MOUSE_LEFT;
 }
 
