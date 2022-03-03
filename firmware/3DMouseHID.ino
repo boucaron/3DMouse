@@ -670,12 +670,14 @@ void writeHID() {
 
 void freecadSwitchMode() {
   Serial.println("freecadSwitchMode");
+  Mouse.release(MOUSE_LEFT|MOUSE_MIDDLE|MOUSE_RIGHT);
+  delay(250);
   if ( mouseBuf[0].data.mouse.mouseButton == MOUSE_MIDDLE ) {   
     freecadConfiguration(true);
   } else {
     freecadConfiguration(false);
   }
-  delay(250);
+ 
 }
 
 // FreeCAD mouse test : CAD Mode
