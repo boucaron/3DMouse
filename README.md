@@ -59,7 +59,7 @@ Inspired by the great work made by https://github.com/FaqT0tum/Orbion_Space_Mous
     -   Features:
         - Debug Hardware (serial monitor) [OK]
         -  Basic Mouse Emulator (single button) [OK]
-        -  FreeCAD (translate, rotation mode) [OK]
+        -  FreeCAD (translate, rotation mode) [OK] [Experimental: Click on Joystick Button switch back and forth from Translate/Rotate mode]
         -  Blender (translate, rotation mode) [OK]
         -  ChopChop3D Slicer (translate, rotation mode) [OK]
         -  Fusion360 (translate, rotation mode) [OK]	
