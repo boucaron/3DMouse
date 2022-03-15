@@ -60,32 +60,6 @@
              </property>
             </widget>
            </item>
-           <item row="1" column="0">
-            <widget class="QPushButton" name="FreeCADRotateMode">
-             <property name="sizePolicy">
-              <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-               <horstretch>0</horstretch>
-               <verstretch>0</verstretch>
-              </sizepolicy>
-             </property>
-             <property name="text">
-              <string>Rotate</string>
-             </property>
-             <property name="icon">
-              <iconset>
-               <normaloff>ui/Freecad.PNG</normaloff>ui/Freecad.PNG</iconset>
-             </property>
-             <property name="iconSize">
-              <size>
-               <width>32</width>
-               <height>32</height>
-              </size>
-             </property>
-             <property name="shortcut">
-              <string>Shift+F</string>
-             </property>
-            </widget>
-           </item>
            <item row="2" column="0">
             <widget class="QPushButton" name="Fusion360TranslateMode">
              <property name="sizePolicy">
@@ -112,7 +86,33 @@
              </property>
             </widget>
            </item>
-           <item row="3" column="0">
+           <item row="0" column="1">
+            <widget class="QPushButton" name="FreeCADRotateMode">
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
+             </property>
+             <property name="text">
+              <string>Rotate</string>
+             </property>
+             <property name="icon">
+              <iconset>
+               <normaloff>ui/Freecad.PNG</normaloff>ui/Freecad.PNG</iconset>
+             </property>
+             <property name="iconSize">
+              <size>
+               <width>32</width>
+               <height>32</height>
+              </size>
+             </property>
+             <property name="shortcut">
+              <string>Shift+F</string>
+             </property>
+            </widget>
+           </item>
+           <item row="2" column="1">
             <widget class="QPushButton" name="Fusion360RotateMode">
              <property name="sizePolicy">
               <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
@@ -199,8 +199,24 @@
            </item>
            <item row="5" column="0">
             <widget class="QPushButton" name="Paint3DTranslateMode">
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
+             </property>
              <property name="text">
-              <string>Paint 3D Translate</string>
+              <string>Translate</string>
+             </property>
+             <property name="icon">
+              <iconset>
+               <normaloff>ui/Paint3D-icon.png</normaloff>ui/Paint3D-icon.png</iconset>
+             </property>
+             <property name="iconSize">
+              <size>
+               <width>32</width>
+               <height>32</height>
+              </size>
              </property>
             </widget>
            </item>
@@ -284,20 +300,6 @@
            </item>
            <item row="5" column="1">
             <widget class="QPushButton" name="Paint3DRotateMode">
-             <property name="text">
-              <string>Paint 3D Rotate</string>
-             </property>
-            </widget>
-           </item>
-          </layout>
-         </widget>
-         <widget class="QWidget" name="tab_10">
-          <attribute name="title">
-           <string>3D Printing</string>
-          </attribute>
-          <layout class="QGridLayout" name="gridLayout_4">
-           <item row="1" column="0">
-            <widget class="QPushButton" name="ChopChop3DSlicerRotateMode">
              <property name="sizePolicy">
               <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
                <horstretch>0</horstretch>
@@ -309,7 +311,7 @@
              </property>
              <property name="icon">
               <iconset>
-               <normaloff>ui/CC3D.png</normaloff>ui/CC3D.png</iconset>
+               <normaloff>ui/Paint3D-icon.png</normaloff>ui/Paint3D-icon.png</iconset>
              </property>
              <property name="iconSize">
               <size>
@@ -317,8 +319,35 @@
                <height>32</height>
               </size>
              </property>
-             <property name="shortcut">
-              <string>Shift+D</string>
+            </widget>
+           </item>
+          </layout>
+         </widget>
+         <widget class="QWidget" name="tab_10">
+          <attribute name="title">
+           <string>3D Printing</string>
+          </attribute>
+          <layout class="QGridLayout" name="gridLayout_4">
+           <item row="2" column="0">
+            <widget class="QPushButton" name="m3DBuilderTranslateMode">
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
+             </property>
+             <property name="text">
+              <string>Translate</string>
+             </property>
+             <property name="icon">
+              <iconset>
+               <normaloff>ui/3d-builder-icon.png</normaloff>ui/3d-builder-icon.png</iconset>
+             </property>
+             <property name="iconSize">
+              <size>
+               <width>32</width>
+               <height>32</height>
+              </size>
              </property>
             </widget>
            </item>
@@ -348,17 +377,52 @@
              </property>
             </widget>
            </item>
-           <item row="2" column="0">
-            <widget class="QPushButton" name="m3DBuilderTranslateMode">
+           <item row="0" column="1">
+            <widget class="QPushButton" name="ChopChop3DSlicerRotateMode">
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
+             </property>
              <property name="text">
-              <string>3D Builder Translate</string>
+              <string>Rotate</string>
+             </property>
+             <property name="icon">
+              <iconset>
+               <normaloff>ui/CC3D.png</normaloff>ui/CC3D.png</iconset>
+             </property>
+             <property name="iconSize">
+              <size>
+               <width>32</width>
+               <height>32</height>
+              </size>
+             </property>
+             <property name="shortcut">
+              <string>Shift+D</string>
              </property>
             </widget>
            </item>
-           <item row="3" column="0">
+           <item row="2" column="1">
             <widget class="QPushButton" name="m3DBuilderRotateMode">
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Minimum" vsizetype="Expanding">
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
+             </property>
              <property name="text">
-              <string>3D Builder Rotate</string>
+              <string>Rotate</string>
+             </property>
+             <property name="icon">
+              <iconset>
+               <normaloff>ui/3d-builder-icon.png</normaloff>ui/3d-builder-icon.png</iconset>
+             </property>
+             <property name="iconSize">
+              <size>
+               <width>32</width>
+               <height>32</height>
+              </size>
              </property>
             </widget>
            </item>
