@@ -5,10 +5,12 @@
 #include "Keyboard.h"
 #include "Mouse.h"
 
+#ifdef JB3DMOUSE_USE_ENCODER
 #include "Encoder.h" // https://github.com/PaulStoffregen
+#endif
 
-#define SERIALBUFLEN 40
-#define MOUSEBUFLEN 40
+#define SERIALBUFLEN 20
+#define MOUSEBUFLEN 20
 
 const char *MVERSION = "3DMouseHID V0.0";
 
@@ -19,13 +21,14 @@ const int horzPin = A1;         // Pin Analog output of X
 const int vertPin = A2;        // Pin Analog output of Y
 const int joyButt = 15;         // Pin Joystick Button
 
+#ifdef JB3DMOUSE_USE_ENCODER
 // ENCODER
 const int encBut = 5;    //Pin encoder Button
 const int encDT = 7;       // Pin  Detect
 const int encCLK = 6;      // Pin  Clockwise
 Encoder myEnc(encDT, encCLK);
 long positionEnc  = -999;
-
+#endif
 
 
 void freecadConfiguration(bool);
@@ -34,6 +37,7 @@ void blenderConfiguration(bool);
 void chopchop3DConfiguration(bool);
 void zBrushConfiguration(int);
 void fusion360Configuration(bool);
+void M3DBuilderConfiguration(bool);
 
 
 
@@ -84,23 +88,23 @@ struct  MouseState {
 
 
   void print() {
-    Serial.println("State:");
-    Serial.print("UpX:"); Serial.print(UpX); Serial.println();
-    Serial.print("DownX:"); Serial.print(DownX); Serial.println();
-    Serial.print("UpY:"); Serial.print(UpY); Serial.println();
-    Serial.print("DownY:"); Serial.print(DownY); Serial.println();
-    Serial.print("UpZ:"); Serial.print(UpZ); Serial.println();
-    Serial.print("DownZ:"); Serial.print(DownZ); Serial.println();
-    Serial.print("ButtonZ:"); Serial.print(ButtonZ); Serial.println();
-    Serial.print("RotateZ:"); Serial.print(RotateZ); Serial.println();
-    Serial.print("XZero:"); Serial.print(XZero); Serial.println();
-    Serial.print("YZero:"); Serial.print(YZero); Serial.println();    
-    Serial.print("OffsetJoyX"); Serial.print(offsetJoyX); Serial.println();
-    Serial.print("OffsetJoyY"); Serial.print(offsetJoyY); Serial.println();
-    Serial.print("XValue:"); Serial.print(XValue); Serial.println();
-    Serial.print("YValue:"); Serial.print(YValue); Serial.println();
-    Serial.print("XSens:"); Serial.print(XSens); Serial.println();
-    Serial.print("YSens:"); Serial.print(YSens); Serial.println();
+    Serial.println(F("State:"));
+    Serial.print(F("UpX:")); Serial.print(UpX); Serial.println();
+    Serial.print(F("DownX:")); Serial.print(DownX); Serial.println();
+    Serial.print(F("UpY:")); Serial.print(UpY); Serial.println();
+    Serial.print(F("DownY:")); Serial.print(DownY); Serial.println();
+    Serial.print(F("UpZ:")); Serial.print(UpZ); Serial.println();
+    Serial.print(F("DownZ:")); Serial.print(DownZ); Serial.println();
+    Serial.print(F("ButtonZ:")); Serial.print(ButtonZ); Serial.println();
+    Serial.print(F("RotateZ:")); Serial.print(RotateZ); Serial.println();
+    Serial.print(F("XZero:")); Serial.print(XZero); Serial.println();
+    Serial.print(F("YZero:")); Serial.print(YZero); Serial.println();    
+    Serial.print(F("OffsetJoyX")); Serial.print(offsetJoyX); Serial.println();
+    Serial.print(F("OffsetJoyY")); Serial.print(offsetJoyY); Serial.println();
+    Serial.print(F("XValue:")); Serial.print(XValue); Serial.println();
+    Serial.print(F("YValue:")); Serial.print(YValue); Serial.println();
+    Serial.print(F("XSens:")); Serial.print(XSens); Serial.println();
+    Serial.print(F("YSens:")); Serial.print(YSens); Serial.println();
   }
 
 
@@ -144,24 +148,24 @@ struct MouseKeyHID {
   void print() {
     Serial.print("<<");
     switch (mode) {
-       case NOTSET: Serial.print("NOTSET"); break;
-       case KEYBOARD_PRESS: Serial.print("KEYBOARD_PRESS"); break;
-       case KEYBOARD_RELEASE: Serial.print("KEYBOARD_RELEASE"); break;
-       case MOUSE_PRESS: Serial.print("MOUSE_PRESS"); break;
-       case MOUSE_RELEASE: Serial.print("MOUSE_RELEASE"); break;
-       default: Serial.print("Unknown mode!"); break;
+       case NOTSET: Serial.print(F("NOTSET")); break;
+       case KEYBOARD_PRESS: Serial.print(F("KEYBOARD_PRESS")); break;
+       case KEYBOARD_RELEASE: Serial.print(F("KEYBOARD_RELEASE")); break;
+       case MOUSE_PRESS: Serial.print(F("MOUSE_PRESS")); break;
+       case MOUSE_RELEASE: Serial.print(F("MOUSE_RELEASE")); break;
+       default: Serial.print(F("Unknown mode!")); break;
     }
-    Serial.print(":");
+    Serial.print(F(":"));
     if ( mode == KEYBOARD_PRESS || mode == KEYBOARD_RELEASE ) {
       Serial.print(data.keyboard.keyboardCode); Serial.print(":");     
     }
     else if ( mode == MOUSE_PRESS || mode == MOUSE_RELEASE ) {
-     Serial.print(data.mouse.mouseButton); Serial.print(":");
-     Serial.print(data.mouse.xAxis); Serial.print(":");
-     Serial.print(data.mouse.yAxis); Serial.print(":");
-     Serial.print(data.mouse.wheel);  Serial.print(":");
+     Serial.print(data.mouse.mouseButton); Serial.print(F(":"));
+     Serial.print(data.mouse.xAxis); Serial.print(F(":"));
+     Serial.print(data.mouse.yAxis); Serial.print(F(":"));
+     Serial.print(data.mouse.wheel);  Serial.print(F(":"));
     }
-    Serial.println(">>");
+    Serial.println(F(">>"));
   }
 
   void read() {
@@ -172,7 +176,7 @@ struct MouseKeyHID {
       case 2: mode = KEYBOARD_RELEASE; break;
       case 3: mode = MOUSE_PRESS; break;
       case 4: mode = MOUSE_RELEASE; break;
-      default: Serial.print("Unknown mode!"); break;
+      default: Serial.print(F("Unknown mode!")); break;
   }
     if ( mode == KEYBOARD_PRESS || mode == KEYBOARD_RELEASE ) {
       data.keyboard.keyboardCode = Serial.parseInt();
@@ -328,17 +332,17 @@ struct MouseConf {
   }
 
   void print() {
-    Serial.println("Configuration:");
-    Serial.print("UpX:"); UpX.print();  Serial.println();
-    Serial.print("DownX:"); DownX.print(); Serial.println();
-    Serial.print("UpY:"); UpY.print();  Serial.println();
-    Serial.print("DownY:"); DownY.print(); Serial.println();
-    Serial.print("UpZ:"); UpZ.print(); Serial.println();
-    Serial.print("DownZ:"); DownZ.print(); Serial.println();
-    Serial.print("ButtonZ:"); ButtonZ.print(); Serial.println();
-    Serial.print("RotateZ:"); RotateZ.print(); Serial.println();
-    Serial.print("before:"); before.print(); Serial.println();
-    Serial.print("after:"); after.print(); Serial.println();
+    Serial.println(F("Configuration:"));
+    Serial.print(F("UpX:")); UpX.print();  Serial.println();
+    Serial.print(F("DownX:")); DownX.print(); Serial.println();
+    Serial.print(F("UpY:")); UpY.print();  Serial.println();
+    Serial.print(F("DownY:")); DownY.print(); Serial.println();
+    Serial.print(F("UpZ:")); UpZ.print(); Serial.println();
+    Serial.print(F("DownZ:")); DownZ.print(); Serial.println();
+    Serial.print(F("ButtonZ:")); ButtonZ.print(); Serial.println();
+    Serial.print(F("RotateZ:")); RotateZ.print(); Serial.println();
+    Serial.print(F("before:")); before.print(); Serial.println();
+    Serial.print(F("after:")); after.print(); Serial.println();
   }
 
   void read() {
@@ -471,9 +475,12 @@ void setup() {
   pinMode(joyButt, INPUT_PULLUP);
   pinMode(horzPin, INPUT_PULLUP);
   pinMode(vertPin, INPUT_PULLUP);
+
+#ifdef JB3DMOUSE_USE_ENCODER  
   pinMode(encBut, INPUT_PULLUP);
   pinMode(encDT, INPUT);
   pinMode(encCLK, INPUT);
+#endif  
 
   mouseState.setup();
   previousMouseState.setup();
@@ -487,24 +494,26 @@ void setup() {
 }
 
 void helpCommand() {
-  Serial.println("Commands:");
-  Serial.println("V: prints firmware version");
-  Serial.println("H: shows this help");
-  Serial.println("S: shows current mouse state");
-  Serial.println("C: shows current mouse configuration");
-  Serial.println("R: read mouse configuration");
-  Serial.println("f: FreeCAD Translate Mouse Configuration");
-  Serial.println("F: FreeCAD Rotate Mouse Configuration");
-  Serial.println("m: Basic Mouse Configuration");
-  Serial.println("b: Blender Translate Mouse Configuration");
-  Serial.println("B: Blender Rotate Mouse Configuration");
-  Serial.println("d: ChopChop3D Translate Mouse Configuration");
-  Serial.println("D: ChopChop3D Rotate Mouse Configuration");
-  Serial.println("z: zBrush Translate Mouse Configuration");
-  Serial.println("Z: zBrush Rotate Mouse Configuration");
-  Serial.println("x: zBrush Scale Mouse Configuration");
-  Serial.println("u: Fusion360 Translate Mouse Configuration");
-  Serial.println("U: Fusion360 Rotate Mouse Configuration");
+  Serial.println(F("Commands:"));
+  Serial.println(F("V: prints firmware version"));
+  Serial.println(F("H: shows this help"));
+  Serial.println(F("S: shows current mouse state"));
+  Serial.println(F("C: shows current mouse configuration"));
+  Serial.println(F("R: read mouse configuration"));
+  Serial.println(F("f: FreeCAD Translate Mouse Configuration"));
+  Serial.println(F("F: FreeCAD Rotate Mouse Configuration"));
+  Serial.println(F("m: Basic Mouse Configuration"));
+  Serial.println(F("b: Blender Translate Mouse Configuration"));
+  Serial.println(F("B: Blender Rotate Mouse Configuration"));
+  Serial.println(F("d: ChopChop3D Translate Mouse Configuration"));
+  Serial.println(F("D: ChopChop3D Rotate Mouse Configuration"));
+  Serial.println(F("z: zBrush Translate Mouse Configuration"));
+  Serial.println(F("Z: zBrush Rotate Mouse Configuration"));
+  Serial.println(F("x: zBrush Scale Mouse Configuration"));
+  Serial.println(F("u: Fusion360 Translate Mouse Configuration"));
+  Serial.println(F("U: Fusion360 Rotate Mouse Configuration"));
+  Serial.println(F("i: 3D Builder Translate Mouse Configuration"));
+  Serial.println(F("I: 3D Builder Rotate Mouse Configuration")); 
 }
 
 void readSerialPort() {
@@ -532,55 +541,63 @@ void readSerialPort() {
         mouseConf.read();
         break;     
       case 'f': // Translate
-        Serial.println("FreeCAD Translate Mode");
+        Serial.println(F("FreeCAD Translate Mode"));
         freecadConfiguration(false);
         break;
       case 'F': // Rotate
-        Serial.println("FreeCAD Rotate Mode");
+        Serial.println(F("FreeCAD Rotate Mode"));
         freecadConfiguration(true);
         break;
       case 'm':
-        Serial.println("Basic Mouse Mode");
+        Serial.println(F("Basic Mouse Mode"));
         basicMouseConfiguration();
         break; 
       case 'b':
-        Serial.println("Blender Translate Mode");
+        Serial.println(F("Blender Translate Mode"));
         blenderConfiguration(false);
         break;
       case 'B':
-        Serial.println("Blender Rotate Mode");
+        Serial.println(F("Blender Rotate Mode"));
         blenderConfiguration(true);
         break; 
       case 'd':
-        Serial.println("ChopChop3D Translate Mode");
+        Serial.println(F("ChopChop3D Translate Mode"));
         chopchop3DConfiguration(false);
         break;
       case 'D':
-        Serial.println("ChopChop3D Rotate Mode");
+        Serial.println(F("ChopChop3D Rotate Mode"));
         chopchop3DConfiguration(true);
         break;      
       case 'z':
-        Serial.println("zBrush Translate Mode");
+        Serial.println(F("zBrush Translate Mode"));
         zBrushConfiguration(0);
         break; 
       case 'Z':
-        Serial.println("zBrush Rotate Mode");
+        Serial.println(F("zBrush Rotate Mode"));
         zBrushConfiguration(2);
         break;  
        case 'x':
-        Serial.println("zBrush Scale Mode");
+        Serial.println(F("zBrush Scale Mode"));
         zBrushConfiguration(1);
         break;     
       case 'u':
-        Serial.println("Fusion360 Translate Mode");
+        Serial.println(F("Fusion360 Translate Mode"));
         fusion360Configuration(false);
         break;
       case 'U':
-        Serial.println("Fusion360 Rotate Mode");
+        Serial.println(F("Fusion360 Rotate Mode"));
         fusion360Configuration(true);
         break;
+      case 'i':
+        Serial.println(F("3D Builder Translate Mode"));
+        M3DBuilderConfiguration(false);
+        break;
+      case 'I':
+        Serial.println(F("3D Builder Rotate Mode"));
+        M3DBuilderConfiguration(true);
+        break;
       default:
-        Serial.print("Unknown command:");
+        Serial.print(F("Unknown command:"));
         Serial.print(inByte);
         helpCommand();
     }
@@ -635,6 +652,7 @@ void readMouse() {
     mouseState.ButtonZ = 1;
   }
 
+#ifdef JB3DMOUSE_USE_ENCODER
   //Encoder
   long newEPosition = myEnc.read();
   if (newEPosition != positionEnc) {
@@ -655,6 +673,7 @@ void readMouse() {
   } else {
     // mouseState.ButtonZ = 1;
   }
+#endif
 
 
 
@@ -1064,6 +1083,65 @@ void fusion360Configuration(bool rotate) {
  
 
 }
+
+
+void M3DBuilderConfiguration(bool rotate) {
+  mouseState.reset();
+
+
+ mouseConf.before.from = -1;
+ mouseConf.before.to = -1;
+ mouseConf.after.from = -1;
+ mouseConf.after.to = -1;
+
+  uint8_t mode = MOUSE_RIGHT;
+  if ( rotate == true ) {
+    mode = MOUSE_LEFT;
+  }
+   
+  mouseConf.UpX.from = 0; 
+  mouseConf.UpX.to = 1;
+  mouseBuf[0].cleanData();
+  mouseBuf[0].mode =  MOUSE_PRESS;  
+  mouseBuf[0].data.mouse.xAxis = 1;
+  mouseBuf[0].data.mouse.mouseButton =  mode;
+
+  mouseConf.DownX.from = 1;
+  mouseConf.DownX.to = 2;
+  mouseBuf[1].cleanData();
+  mouseBuf[1].mode =  MOUSE_PRESS;  
+  mouseBuf[1].data.mouse.xAxis = -1;  
+  mouseBuf[1].data.mouse.mouseButton =  mode;
+
+
+  mouseConf.UpY.from = 2;
+  mouseConf.UpY.to = 3;
+  mouseBuf[2].cleanData();
+  mouseBuf[2].mode =  MOUSE_PRESS;    
+  mouseBuf[2].data.mouse.yAxis = -1;  
+  mouseBuf[2].data.mouse.mouseButton =  mode;
+
+  mouseConf.DownY.from = 3;
+  mouseConf.DownY.to = 4;
+  mouseBuf[3].cleanData();
+  mouseBuf[3].mode =  MOUSE_PRESS;   
+  mouseBuf[3].data.mouse.yAxis = 1;  
+  mouseBuf[3].data.mouse.mouseButton =   mode;
+
+  mouseConf.ButtonZ.from = 4;
+  mouseConf.ButtonZ.to = 5;
+  mouseBuf[4].cleanData();
+  mouseBuf[4].mode=  MOUSE_PRESS; 
+  mouseBuf[4].data.mouse.mouseButton = mode;
+
+  mouseConf.before.from = -1;
+  mouseConf.before.to = -1;
+  mouseConf.after.from = -1;
+  mouseConf.before.to = -1;
+  
+}
+
+
 
 
 
