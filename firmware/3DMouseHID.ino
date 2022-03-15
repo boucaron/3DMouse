@@ -38,7 +38,7 @@ void chopchop3DConfiguration(bool);
 void zBrushConfiguration(int);
 void fusion360Configuration(bool);
 void M3DBuilderConfiguration(bool);
-void Painter3DConfiguration(bool);
+void Paint3DConfiguration(bool);
 
 
 
@@ -515,8 +515,8 @@ void helpCommand() {
   Serial.println(F("U: Fusion360 Rotate Mouse Configuration"));
   Serial.println(F("i: 3D Builder Translate Mouse Configuration"));
   Serial.println(F("I: 3D Builder Rotate Mouse Configuration")); 
-  Serial.println(F("p: Painter3D Translate Mouse Configuration"));
-  Serial.println(F("P: Painter3D Rotate Mouse Configuration"));
+  Serial.println(F("p: Paint3D Translate Mouse Configuration"));
+  Serial.println(F("P: Paint3D Rotate Mouse Configuration"));
 }
 
 void readSerialPort() {
@@ -600,12 +600,12 @@ void readSerialPort() {
         M3DBuilderConfiguration(true);
         break;
       case 'p':
-        Serial.println(F("Painter 3D Translate Mode"));
-        Painter3DConfiguration(false);
+        Serial.println(F("Paint 3D Translate Mode"));
+        Paint3DConfiguration(false);
         break;
       case 'P':
-        Serial.println(F("Painter 3D Rotate Mode"));
-        Painter3DConfiguration(true);
+        Serial.println(F("Paint 3D Rotate Mode"));
+        Paint3DConfiguration(true);
         break;
       default:
         Serial.print(F("Unknown command:"));
@@ -1153,7 +1153,7 @@ void M3DBuilderConfiguration(bool rotate) {
 }
 
 
-void Painter3DConfiguration(bool rotate) {
+void Paint3DConfiguration(bool rotate) {
   mouseState.reset();
 
 
