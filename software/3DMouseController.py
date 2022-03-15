@@ -155,6 +155,10 @@ class ControllerDialog(QDialog):
         ui.zBrushTranslateMode.clicked.connect(self.zBrushTranslateMode)
         ui.zBrushScaleMode.clicked.connect(self.zBrushScaleMode)
         ui.zBrushRotateMode.clicked.connect(self.zBrushRotateMode)
+        ui.m3DBuilderTranslateMode.clicked.connect(self.m3DBuilderTranslateMode)
+        ui.m3DBuilderRotateMode.clicked.connect(self.m3DBuilderRotateMode)
+        ui.Paint3DTranslateMode.clicked.connect(self.Paint3DTranslateMode)
+        ui.Paint3DRotateMode.clicked.connect(self.Paint3DRotateMode)
         ui.serialSend.clicked.connect(self.onSendButton)
         ui.refresh.clicked.connect(self.onRefresh)
         ui.connect.clicked.connect(self.onConnect)
@@ -208,6 +212,22 @@ class ControllerDialog(QDialog):
     def zBrushRotateMode(self):
         print("zBrushRotateMode")
         self.serialPortSend('Z',"zBrush Rotate Mode Enabled")
+
+    def m3DBuilderTranslateMode(self):
+        print("m3DBuilderTranslateMode")
+        self.serialPortSend('i',"3DBuilder Translate Mode Enabled")
+
+    def m3DBuilderRotateMode(self):
+        print("m3DBuilderRotateMode")
+        self.serialPortSend('I',"3DBuilder Rotate Mode Enabled")
+
+    def Paint3DTranslateMode(self):
+        print("Paint3DTranslateMode")
+        self.serialPortSend('p',"Paint3D Translate Mode Enabled")
+
+    def Paint3DRotateMode(self):
+        print("Paint3DRotateMode")
+        self.serialPortSend('P',"Paint3D Rotate Mode Enabled")
 
 # Send to the firmware the command (single char otherstuff ignored)      
     def onSendButton(self):
