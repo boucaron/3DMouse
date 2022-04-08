@@ -9,10 +9,10 @@
 #include "Encoder.h" // https://github.com/PaulStoffregen
 #endif
 
-#define SERIALBUFLEN 20
+#define SERIALBUFLEN 40
 #define MOUSEBUFLEN 20
 
-const char *MVERSION = "3DMouseHID V0.0";
+const char *MVERSION = "3DMouseHID V0.1";
 
 const int pinLed = LED_BUILTIN;
 
@@ -39,6 +39,7 @@ void zBrushConfiguration(int);
 void fusion360Configuration(bool);
 void M3DBuilderConfiguration(bool);
 void Paint3DConfiguration(bool);
+void OpenSCADConfiguration(bool);
 
 
 
@@ -517,6 +518,8 @@ void helpCommand() {
   Serial.println(F("I: 3D Builder Rotate Mouse Configuration")); 
   Serial.println(F("p: Paint3D Translate Mouse Configuration"));
   Serial.println(F("P: Paint3D Rotate Mouse Configuration"));
+  Serial.println(F("o: OpenSCAD Translate Mouse Configuration"));
+  Serial.println(F("O: OpenSCAD Rotate Mouse Configuration"));
 }
 
 void readSerialPort() {
@@ -607,6 +610,14 @@ void readSerialPort() {
         Serial.println(F("Paint 3D Rotate Mode"));
         Paint3DConfiguration(true);
         break;
+       case 'o':
+        Serial.println(F("OpenSCAD Translate Mode"));
+        OpenSCADConfiguration(false);
+        break;
+      case 'O':
+        Serial.println(F("OpenSCAD Rotate Mode"));
+        OpenSCADConfiguration(true);
+        break;        
       default:
         Serial.print(F("Unknown command:"));
         Serial.print(inByte);
@@ -1165,6 +1176,64 @@ void Paint3DConfiguration(bool rotate) {
   uint8_t mode = MOUSE_MIDDLE;
   if ( rotate == true ) {
     mode = MOUSE_RIGHT;
+  }
+   
+  mouseConf.UpX.from = 0; 
+  mouseConf.UpX.to = 1;
+  mouseBuf[0].cleanData();
+  mouseBuf[0].mode =  MOUSE_PRESS;  
+  mouseBuf[0].data.mouse.xAxis = 1;
+  mouseBuf[0].data.mouse.mouseButton =  mode;
+
+  mouseConf.DownX.from = 1;
+  mouseConf.DownX.to = 2;
+  mouseBuf[1].cleanData();
+  mouseBuf[1].mode =  MOUSE_PRESS;  
+  mouseBuf[1].data.mouse.xAxis = -1;  
+  mouseBuf[1].data.mouse.mouseButton =  mode;
+
+
+  mouseConf.UpY.from = 2;
+  mouseConf.UpY.to = 3;
+  mouseBuf[2].cleanData();
+  mouseBuf[2].mode =  MOUSE_PRESS;    
+  mouseBuf[2].data.mouse.yAxis = -1;  
+  mouseBuf[2].data.mouse.mouseButton =  mode;
+
+  mouseConf.DownY.from = 3;
+  mouseConf.DownY.to = 4;
+  mouseBuf[3].cleanData();
+  mouseBuf[3].mode =  MOUSE_PRESS;   
+  mouseBuf[3].data.mouse.yAxis = 1;  
+  mouseBuf[3].data.mouse.mouseButton =   mode;
+
+  mouseConf.ButtonZ.from = 4;
+  mouseConf.ButtonZ.to = 5;
+  mouseBuf[4].cleanData();
+  mouseBuf[4].mode=  MOUSE_PRESS; 
+  mouseBuf[4].data.mouse.mouseButton = mode;
+
+  mouseConf.before.from = -1;
+  mouseConf.before.to = -1;
+  mouseConf.after.from = -1;
+  mouseConf.before.to = -1;
+  
+}
+
+
+
+void OpenSCADConfiguration(bool rotate) {
+  mouseState.reset();
+
+
+ mouseConf.before.from = -1;
+ mouseConf.before.to = -1;
+ mouseConf.after.from = -1;
+ mouseConf.after.to = -1;
+
+  uint8_t mode = MOUSE_RIGHT;
+  if ( rotate == true ) {
+    mode = MOUSE_LEFT;
   }
    
   mouseConf.UpX.from = 0; 
