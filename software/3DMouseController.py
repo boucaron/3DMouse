@@ -159,6 +159,8 @@ class ControllerDialog(QDialog):
         ui.m3DBuilderRotateMode.clicked.connect(self.m3DBuilderRotateMode)
         ui.Paint3DTranslateMode.clicked.connect(self.Paint3DTranslateMode)
         ui.Paint3DRotateMode.clicked.connect(self.Paint3DRotateMode)
+        ui.OpenSCADTranslateMode.clicked.connect(self.OpenSCADTranslateMode)
+        ui.OpenSCADRotateMode.clicked.connect(self.OpenSCADRotateMode)
         ui.serialSend.clicked.connect(self.onSendButton)
         ui.refresh.clicked.connect(self.onRefresh)
         ui.connect.clicked.connect(self.onConnect)
@@ -228,6 +230,14 @@ class ControllerDialog(QDialog):
     def Paint3DRotateMode(self):
         print("Paint3DRotateMode")
         self.serialPortSend('P',"Paint3D Rotate Mode Enabled")
+
+    def OpenSCADTranslateMode(self):
+        print("OpenSCADTranslateMode")
+        self.serialPortSend('o',"OpenSCAD Translate Mode Enabled")
+
+    def OpenSCADRotateMode(self):
+        print("OpenSCADRotateMode")
+        self.serialPortSend('O',"OpenSCAD Rotate Mode Enabled")
 
 # Send to the firmware the command (single char otherstuff ignored)      
     def onSendButton(self):
