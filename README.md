@@ -64,8 +64,8 @@ Inspired by the great work made by https://github.com/FaqT0tum/Orbion_Space_Mous
         -  **ChopChop3D Slicer** (translate, rotation mode) [OK]
         -  **Fusion360** (translate, rotation mode) [OK]	
         -  **3D Builder** (translate, rotation mode) [OK]
-        -  **Painter 3D** (translate, rotation mode) [OK]
-	-  **OpenSCAD** (translate, rotation mode) [OK]
+	-  **Painter 3D** (translate, rotation mode) [OK]
+        -  **OpenSCAD** (translate, rotation mode) [OK]
         -  ZBrush (translate, rotation, scale mode) [TO TEST]
     -   How to:
         -  Connect the 3DMouse to the Computer
