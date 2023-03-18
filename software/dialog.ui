@@ -552,13 +552,13 @@
      </widget>
      <widget class="QWidget" name="tab_6">
       <attribute name="title">
-       <string>Voice</string>
+       <string>Speech</string>
       </attribute>
       <layout class="QHBoxLayout" name="horizontalLayout">
        <item>
         <widget class="QTabWidget" name="tabWidget_2">
          <property name="currentIndex">
-          <number>1</number>
+          <number>0</number>
          </property>
          <widget class="QWidget" name="tab_7">
           <attribute name="title">
@@ -566,27 +566,41 @@
           </attribute>
           <layout class="QFormLayout" name="formLayout">
            <item row="1" column="1">
-            <widget class="QComboBox" name="recognitionLanguage"/>
+            <widget class="QComboBox" name="recognitionLanguage">
+             <property name="enabled">
+              <bool>false</bool>
+             </property>
+            </widget>
            </item>
            <item row="1" column="0">
             <widget class="QLabel" name="label_2">
+             <property name="enabled">
+              <bool>false</bool>
+             </property>
              <property name="text">
               <string>Language:</string>
              </property>
             </widget>
            </item>
            <item row="0" column="0">
-            <widget class="QCheckBox" name="voiceRecognition">
+            <widget class="QCheckBox" name="speechRecognition">
              <property name="text">
-              <string>Enabled Voice Recognition</string>
+              <string>Enabled Speech Recognition</string>
              </property>
             </widget>
            </item>
            <item row="4" column="1">
-            <widget class="QComboBox" name="micros"/>
+            <widget class="QComboBox" name="micros">
+             <property name="enabled">
+              <bool>false</bool>
+             </property>
+            </widget>
            </item>
            <item row="4" column="0">
             <widget class="QLabel" name="label_5">
+             <property name="enabled">
+              <bool>false</bool>
+             </property>
              <property name="text">
               <string>Micro:</string>
              </property>
@@ -594,6 +608,9 @@
            </item>
            <item row="8" column="1">
             <widget class="QPushButton" name="testMicro">
+             <property name="enabled">
+              <bool>false</bool>
+             </property>
              <property name="text">
               <string>Test Micro</string>
              </property>
@@ -601,16 +618,26 @@
            </item>
            <item row="3" column="0">
             <widget class="QLabel" name="label_6">
+             <property name="enabled">
+              <bool>false</bool>
+             </property>
              <property name="text">
               <string>Output:</string>
              </property>
             </widget>
            </item>
            <item row="3" column="1">
-            <widget class="QComboBox" name="outputs"/>
+            <widget class="QComboBox" name="outputs">
+             <property name="enabled">
+              <bool>false</bool>
+             </property>
+            </widget>
            </item>
            <item row="5" column="1">
             <widget class="QPushButton" name="scanOutputs">
+             <property name="enabled">
+              <bool>false</bool>
+             </property>
              <property name="text">
               <string>Scan Outputs</string>
              </property>
@@ -618,6 +645,9 @@
            </item>
            <item row="5" column="0">
             <widget class="QPushButton" name="scanMicros">
+             <property name="enabled">
+              <bool>false</bool>
+             </property>
              <property name="text">
               <string>Scan Micros</string>
              </property>
@@ -631,9 +661,9 @@
           </attribute>
           <layout class="QFormLayout" name="formLayout_3">
            <item row="0" column="0">
-            <widget class="QCheckBox" name="voiceSynthesis">
+            <widget class="QCheckBox" name="speechSynthesis">
              <property name="text">
-              <string>Enable Voice Synthesis</string>
+              <string>Enable Speech Synthesis</string>
              </property>
             </widget>
            </item>
@@ -662,7 +692,7 @@
             </widget>
            </item>
            <item row="3" column="1">
-            <widget class="QPushButton" name="pushButton">
+            <widget class="QPushButton" name="scanVoices">
              <property name="text">
               <string>Scan Voices</string>
              </property>

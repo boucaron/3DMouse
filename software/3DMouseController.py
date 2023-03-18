@@ -4,7 +4,7 @@ import sys
 import random
 from PySide6 import QtCore, QtWidgets, QtGui
 from PySide6.QtWidgets import QDialog, QMessageBox
-from PySide6.QtCore import QObject, SIGNAL, SLOT
+from PySide6.QtCore import Qt, QObject, SIGNAL, SLOT
 from PySide6.QtSerialPort import QSerialPortInfo, QSerialPort
 from PySide6.QtCore import QIODevice, QByteArray, QTimer
 from ui_dialog import Ui_Dialog
@@ -173,6 +173,7 @@ class ControllerDialog(QDialog):
         ui.scanMicros.clicked.connect(self.onScanMicros)
         ui.testMicro.clicked.connect(self.onTestMicro)
         ui.scanOutputs.clicked.connect(self.onScanOutputs)
+        ui.speechRecognition.stateChanged.connect(self.onSpeechRecognition)
 
 # Just callbacks from the buttons        
         
@@ -280,6 +281,30 @@ class ControllerDialog(QDialog):
         
 
 # Voice Recognition
+
+    def onSpeechRecognition(self):
+        print("onSpeechRecognition")
+        if self.ui.speechRecognition.checkState() == Qt.CheckState.Checked:
+            self.ui.label_2.setEnabled(True)
+            self.ui.recognitionLanguage.setEnabled(True)
+            self.ui.label_6.setEnabled(True)
+            self.ui.outputs.setEnabled(True)
+            self.ui.label_5.setEnabled(True)
+            self.ui.micros.setEnabled(True)
+            self.ui.scanMicros.setEnabled(True)
+            self.ui.scanOutputs.setEnabled(True)
+            self.ui.testMicro.setEnabled(True)
+        else:
+            self.ui.label_2.setEnabled(False)
+            self.ui.recognitionLanguage.setEnabled(False)
+            self.ui.label_6.setEnabled(False)
+            self.ui.outputs.setEnabled(False)
+            self.ui.label_5.setEnabled(False)
+            self.ui.micros.setEnabled(False)
+            self.ui.scanMicros.setEnabled(False)
+            self.ui.scanOutputs.setEnabled(False)
+            self.ui.testMicro.setEnabled(False)
+            
         
 # Scan all micros
     def onScanMicros(self):
