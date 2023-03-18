@@ -294,6 +294,9 @@ class ControllerDialog(QDialog):
             self.ui.scanMicros.setEnabled(True)
             self.ui.scanOutputs.setEnabled(True)
             self.ui.testMicro.setEnabled(True)
+
+            self.onScanMicros()
+            self.onScanOutputs()
         else:
             self.ui.label_2.setEnabled(False)
             self.ui.recognitionLanguage.setEnabled(False)
