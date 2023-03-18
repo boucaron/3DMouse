@@ -13,8 +13,10 @@ from ui_dialog import Ui_Dialog
 PRODUCT_ID = 32822
 VENDOR_ID = 9025
 
-# Audio for Speech Detection
+# Speech Recognition
 import pyaudio
+# Speech Synthesis
+import pyttsx3
 
 
 class ControllerDialog(QDialog):
@@ -393,6 +395,8 @@ class ControllerDialog(QDialog):
              self.ui.label_7.setEnabled(True)
              self.ui.testMessage.setEnabled(True)
              self.ui.testSynthesis.setEnabled(True)
+
+             self.onScanVoices()
          else:
              self.ui.label_3.setEnabled(False)
              self.ui.voices.setEnabled(False)
@@ -402,6 +406,22 @@ class ControllerDialog(QDialog):
              self.ui.label_7.setEnabled(False)
              self.ui.testMessage.setEnabled(False)
              self.ui.testSynthesis.setEnabled(False)
+
+    def onScanVoices(self):
+        print("onScanVoices")
+
+        engine = pyttsx3.init()
+        rate = engine.getProperty("rate")
+        voices = engine.getProperty("voices")
+
+        print(voices)
+        
+        for i in voices:
+            print(i)
+
+        self.ui.voices.clear()
+        for i in voices:
+            self.ui.voices.addItem(i.name)
         
 
 if __name__ == "__main__":
