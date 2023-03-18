@@ -1,4 +1,4 @@
-# (c) 2022 Julien BOUCARON under MIT License
+# (c) 2022-3 Julien BOUCARON under MIT License
 
 import sys
 import random
@@ -13,6 +13,9 @@ from ui_dialog import Ui_Dialog
 PRODUCT_ID = 32822
 VENDOR_ID = 9025
 
+# Audio for Speech Detection
+import pyaudio
+
 
 class ControllerDialog(QDialog):
 
@@ -21,6 +24,8 @@ class ControllerDialog(QDialog):
     ports = None
     port = None
     portSerial = None
+    inputsMic = {}
+    outputs = {}
     
     def __init__(self, parent=None):
         super(ControllerDialog, self).__init__(parent)
@@ -165,6 +170,10 @@ class ControllerDialog(QDialog):
         ui.refresh.clicked.connect(self.onRefresh)
         ui.connect.clicked.connect(self.onConnect)
 
+        ui.scanMicros.clicked.connect(self.onScanMicros)
+        ui.testMicro.clicked.connect(self.onTestMicro)
+        ui.scanOutputs.clicked.connect(self.onScanOutputs)
+
 # Just callbacks from the buttons        
         
     def mouseMode(self):
@@ -237,7 +246,7 @@ class ControllerDialog(QDialog):
 
     def OpenSCADRotateMode(self):
         print("OpenSCADRotateMode")
-        self.serialPortSend('O',"OpenSCAD Rotate Mode Enabled")
+        self.serialPortSend('O',"OpenSCAD Rotate Mode Enabled")        
 
 # Send to the firmware the command (single char otherstuff ignored)      
     def onSendButton(self):
@@ -269,8 +278,77 @@ class ControllerDialog(QDialog):
             return
         self.serialPortConnectAtIndex(self.ui.serialPorts.currentIndex())
         
+
+# Voice Recognition
+        
+# Scan all micros
+    def onScanMicros(self):
+        print("onScanMicros")
+        self.ui.micros.clear()
+        self.inputsMic.clear()
+        p = pyaudio.PyAudio()
+        info = p.get_host_api_info_by_index(0)
+        numdevices = info.get('deviceCount')
+
+        count = 0
+        for i in range(0, numdevices):            
+            if (p.get_device_info_by_host_api_device_index(0, i).get('maxInputChannels')) > 0:
+                print("Input Device id ", i, " - ", p.get_device_info_by_host_api_device_index(0, i).get('name'))
+                self.ui.micros.addItem(p.get_device_info_by_host_api_device_index(0, i).get('name'))
+                self.inputsMic[count] = i
+                count += 1
+        p.terminate()
+
+# Scan all outputs
+    def onScanOutputs(self):
+        print("onScanOutputs")
+        self.ui.outputs.clear()
+        self.outputs.clear()
+        p = pyaudio.PyAudio()
+        info = p.get_host_api_info_by_index(0)
+        numdevices = info.get('deviceCount')
+
+        count = 0
+        for i in range(0, numdevices):
+            if (p.get_device_info_by_host_api_device_index(0, i).get('maxOutputChannels')) > 0:
+                print("Output Device id ", i, " - ", p.get_device_info_by_host_api_device_index(0, i).get('name'))
+                self.ui.outputs.addItem(p.get_device_info_by_host_api_device_index(0, i).get('name'))
+                self.outputs[count] = i
+                count += 1
+        p.terminate()
+        
+                
+# Test current micro
+    def onTestMicro(self):
+        print("onTestMicro");
+
+        if self.ui.micros.currentIndex() < 0:
+            print("No Micro Set - Please Scan Micros first ")
+            return
+        if self.ui.outputs.currentIndex() < 0:
+            print("No Output Set - Please Scan Outputs first ")
+            return
         
 
+        print("Say something in the microphone")
+        fs = 8000
+        duration = 3
+        nsamples  = fs * duration
+        p = pyaudio.PyAudio()        
+        streamIn = p.open(format=pyaudio.paInt16, channels=1, rate=fs, input=True,
+                          frames_per_buffer=nsamples, input_device_index=self.inputsMic[self.ui.micros.currentIndex()])
+        buffer = streamIn.read(nsamples)
+        streamIn.stop_stream()
+        streamIn.close()
+
+        # Play the 3 seconds record now
+        print("Playing out the recorded something")
+        streamOut = p.open(format=pyaudio.paInt16, channels=1, rate=fs, output=True,
+                           frames_per_buffer=nsamples, output_device_index=self.outputs[self.ui.outputs.currentIndex()])
+        streamOut.write(buffer)
+        streamOut.stop_stream()
+        streamOut.close()
+        p.terminate()
         
 
 if __name__ == "__main__":
