@@ -557,6 +557,9 @@
       <layout class="QHBoxLayout" name="horizontalLayout">
        <item>
         <widget class="QTabWidget" name="tabWidget_2">
+         <property name="enabled">
+          <bool>true</bool>
+         </property>
          <property name="currentIndex">
           <number>0</number>
          </property>
@@ -669,16 +672,26 @@
            </item>
            <item row="1" column="0">
             <widget class="QLabel" name="label_3">
+             <property name="enabled">
+              <bool>false</bool>
+             </property>
              <property name="text">
               <string>Voice:</string>
              </property>
             </widget>
            </item>
            <item row="1" column="1">
-            <widget class="QComboBox" name="voices"/>
+            <widget class="QComboBox" name="voices">
+             <property name="enabled">
+              <bool>false</bool>
+             </property>
+            </widget>
            </item>
            <item row="2" column="0">
             <widget class="QLabel" name="label_4">
+             <property name="enabled">
+              <bool>false</bool>
+             </property>
              <property name="text">
               <string>Language:</string>
              </property>
@@ -686,6 +699,9 @@
            </item>
            <item row="2" column="1">
             <widget class="QLineEdit" name="synthesisLanguage">
+             <property name="enabled">
+              <bool>false</bool>
+             </property>
              <property name="readOnly">
               <bool>true</bool>
              </property>
@@ -693,8 +709,41 @@
            </item>
            <item row="3" column="1">
             <widget class="QPushButton" name="scanVoices">
+             <property name="enabled">
+              <bool>false</bool>
+             </property>
              <property name="text">
               <string>Scan Voices</string>
+             </property>
+            </widget>
+           </item>
+           <item row="5" column="1">
+            <widget class="QPushButton" name="testSynthesis">
+             <property name="enabled">
+              <bool>false</bool>
+             </property>
+             <property name="text">
+              <string>Test</string>
+             </property>
+            </widget>
+           </item>
+           <item row="4" column="1">
+            <widget class="QLineEdit" name="testMessage">
+             <property name="enabled">
+              <bool>false</bool>
+             </property>
+             <property name="text">
+              <string>Test test test test test</string>
+             </property>
+            </widget>
+           </item>
+           <item row="4" column="0">
+            <widget class="QLabel" name="label_7">
+             <property name="enabled">
+              <bool>false</bool>
+             </property>
+             <property name="text">
+              <string>Test Message:</string>
              </property>
             </widget>
            </item>

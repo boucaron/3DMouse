@@ -175,6 +175,8 @@ class ControllerDialog(QDialog):
         ui.scanOutputs.clicked.connect(self.onScanOutputs)
         ui.speechRecognition.stateChanged.connect(self.onSpeechRecognition)
 
+        ui.speechSynthesis.stateChanged.connect(self.onSpeechSynthesis)
+
 # Just callbacks from the buttons        
         
     def mouseMode(self):
@@ -377,6 +379,29 @@ class ControllerDialog(QDialog):
         streamOut.stop_stream()
         streamOut.close()
         p.terminate()
+
+# Speech Synthesis
+    def onSpeechSynthesis(self):
+         print("onSpeechSynthesis")
+
+         if self.ui.speechSynthesis.checkState() == Qt.CheckState.Checked:
+             self.ui.label_3.setEnabled(True)
+             self.ui.voices.setEnabled(True)
+             self.ui.label_4.setEnabled(True)
+             self.ui.synthesisLanguage.setEnabled(True)
+             self.ui.scanVoices.setEnabled(True)
+             self.ui.label_7.setEnabled(True)
+             self.ui.testMessage.setEnabled(True)
+             self.ui.testSynthesis.setEnabled(True)
+         else:
+             self.ui.label_3.setEnabled(False)
+             self.ui.voices.setEnabled(False)
+             self.ui.label_4.setEnabled(False)
+             self.ui.synthesisLanguage.setEnabled(False)
+             self.ui.scanVoices.setEnabled(False)
+             self.ui.label_7.setEnabled(False)
+             self.ui.testMessage.setEnabled(False)
+             self.ui.testSynthesis.setEnabled(False)
         
 
 if __name__ == "__main__":
