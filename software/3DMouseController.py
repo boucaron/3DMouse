@@ -28,6 +28,7 @@ class ControllerDialog(QDialog):
     portSerial = None
     inputsMic = {}
     outputs = {}
+    voices = {}
     
     def __init__(self, parent=None):
         super(ControllerDialog, self).__init__(parent)
@@ -178,6 +179,8 @@ class ControllerDialog(QDialog):
         ui.speechRecognition.stateChanged.connect(self.onSpeechRecognition)
 
         ui.speechSynthesis.stateChanged.connect(self.onSpeechSynthesis)
+        ui.scanVoices.clicked.connect(self.onScanVoices)
+        ui.testSynthesis.clicked.connect(self.onTestVoice)
 
 # Just callbacks from the buttons        
         
@@ -389,8 +392,6 @@ class ControllerDialog(QDialog):
          if self.ui.speechSynthesis.checkState() == Qt.CheckState.Checked:
              self.ui.label_3.setEnabled(True)
              self.ui.voices.setEnabled(True)
-             self.ui.label_4.setEnabled(True)
-             self.ui.synthesisLanguage.setEnabled(True)
              self.ui.scanVoices.setEnabled(True)
              self.ui.label_7.setEnabled(True)
              self.ui.testMessage.setEnabled(True)
@@ -400,8 +401,6 @@ class ControllerDialog(QDialog):
          else:
              self.ui.label_3.setEnabled(False)
              self.ui.voices.setEnabled(False)
-             self.ui.label_4.setEnabled(False)
-             self.ui.synthesisLanguage.setEnabled(False)
              self.ui.scanVoices.setEnabled(False)
              self.ui.label_7.setEnabled(False)
              self.ui.testMessage.setEnabled(False)
@@ -412,17 +411,33 @@ class ControllerDialog(QDialog):
 
         engine = pyttsx3.init()
         rate = engine.getProperty("rate")
-        voices = engine.getProperty("voices")
+        svoices = engine.getProperty("voices")
 
-        print(voices)
+        print(svoices)
         
-        for i in voices:
+        for i in svoices:
             print(i)
 
         self.ui.voices.clear()
-        for i in voices:
+        count = 0
+        for i in svoices:
             self.ui.voices.addItem(i.name)
+            self.voices[count] = i
+            count += 1
+
+    def onTestVoice(self):
+        print("onTestVoice")
+
+        engine = pyttsx3.init()
+        rate = engine.getProperty("rate")
         
+        currentIdx = self.ui.voices.currentIndex()
+        print("currentIdx = ", currentIdx)
+        print(self.voices);
+        
+        engine.setProperty('voice', self.voices[self.ui.voices.currentIndex()].id)
+        engine.say(self.ui.testMessage.text())
+        engine.runAndWait()
 
 if __name__ == "__main__":
     app = QtWidgets.QApplication([])
