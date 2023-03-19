@@ -473,7 +473,7 @@ class ControllerDialog(QDialog):
 
 
         torch_audio = torch.from_numpy(np.frombuffer(buffer, np.int16).flatten().astype(np.float32) / 32768.0)
-        result = model.transcribe( torch_audio, language="fr" )
+        result = model.transcribe( torch_audio, language="en" )
 
         # Close
         p.terminate()
