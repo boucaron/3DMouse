@@ -478,7 +478,8 @@ class ControllerDialog(QDialog):
         # Close
         p.terminate()
         print(result["text"])
-        self.ui.recognition.setText(result["text"])
+
+        self.ui.recognitionOutput.setText(result["text"])
         
 
 if __name__ == "__main__":
