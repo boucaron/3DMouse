@@ -1,1 +1,6 @@
+numpy==1.24.2
+pyaudio==0.2.13
 PySide6==6.4.2
+pyttsx3==2.90
+torch==2.0.0
+
