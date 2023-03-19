@@ -15,6 +15,9 @@ VENDOR_ID = 9025
 
 # Speech Recognition
 import pyaudio
+import whisper
+import numpy as np
+import torch
 # Speech Synthesis
 import pyttsx3
 
@@ -177,6 +180,7 @@ class ControllerDialog(QDialog):
         ui.testMicro.clicked.connect(self.onTestMicro)
         ui.scanOutputs.clicked.connect(self.onScanOutputs)
         ui.speechRecognition.stateChanged.connect(self.onSpeechRecognition)
+        ui.testRecognition.clicked.connect(self.onWhisper)
 
         ui.speechSynthesis.stateChanged.connect(self.onSpeechSynthesis)
         ui.scanVoices.clicked.connect(self.onScanVoices)
@@ -301,6 +305,8 @@ class ControllerDialog(QDialog):
             self.ui.scanMicros.setEnabled(True)
             self.ui.scanOutputs.setEnabled(True)
             self.ui.testMicro.setEnabled(True)
+            self.ui.testRecognition.setEnabled(True)
+            self.ui.recognitionOutput.setEnabled(True)
 
             self.onScanMicros()
             self.onScanOutputs()
@@ -314,6 +320,8 @@ class ControllerDialog(QDialog):
             self.ui.scanMicros.setEnabled(False)
             self.ui.scanOutputs.setEnabled(False)
             self.ui.testMicro.setEnabled(False)
+            self.ui.testRecognition.setEnabled(False)
+            self.ui.recognitionOutput.setEnabled(False)
             
         
 # Scan all micros
@@ -438,6 +446,40 @@ class ControllerDialog(QDialog):
         engine.setProperty('voice', self.voices[self.ui.voices.currentIndex()].id)
         engine.say(self.ui.testMessage.text())
         engine.runAndWait()
+
+    def onWhisper(self):
+        print("onWhisper");
+        
+        model = whisper.load_model("tiny")
+
+        if self.ui.micros.currentIndex() < 0:
+            print("No Micro Set - Please Scan Micros first ")
+            return
+        if self.ui.outputs.currentIndex() < 0:
+            print("No Output Set - Please Scan Outputs first ")
+            return
+        
+
+        print("Say something in the microphone")
+        fs = 16000
+        duration = 3
+        nsamples  = fs * duration
+        p = pyaudio.PyAudio()        
+        streamIn = p.open(format=pyaudio.paInt16, channels=1, rate=fs, input=True,
+                          frames_per_buffer=nsamples, input_device_index=self.inputsMic[self.ui.micros.currentIndex()])
+        buffer = streamIn.read(nsamples)
+        streamIn.stop_stream()
+        streamIn.close()
+
+
+        torch_audio = torch.from_numpy(np.frombuffer(buffer, np.int16).flatten().astype(np.float32) / 32768.0)
+        result = model.transcribe( torch_audio )
+
+        # Close
+        p.terminate()
+        print(result["text"])
+        self.ui.recognition.setText(result["text"])
+        
 
 if __name__ == "__main__":
     app = QtWidgets.QApplication([])
