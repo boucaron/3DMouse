@@ -1,9 +1,9 @@
 # 3DMouse
 ## Status
-This is still in prototyping phase.... far away from a polished product by any means, nerd only.
+This is still in prototyping phase.... not a polished product by any means, nerd only, but working !
  - Basic Rough Hardware [OK]
  - Firmware [OK]
- - Software for Control and Customization [Control OK, Customization PENDING]
+ - Software for Control and Customization [Control OK, Customization PENDING, Speech Recognition PENDING]
 
 ## Overview
 Inspired by the great work made by https://github.com/FaqT0tum/Orbion_Space_Mouse
@@ -77,11 +77,12 @@ Inspired by the great work made by https://github.com/FaqT0tum/Orbion_Space_Mous
         -  Then choose the mode you need: Type the character and Send
 
 ## Software
-- *PoC*: basic features are there, may still change slightly from a commit to another one
+- *PoC*: basic features are there, may change a bit from a commit to another one
     -   Connect to the Mouse [OK]
     -   Serial Port Monitor [OK]
     -   Update the Mode of the Mouse on the Fly with Buttons [OK]
-    -   Customization for Mouse Configuration [PENDING]
+    -   Customization for Mouse Configuration [PENDING] --> Actually there are several modes already implemented, you can easily add yours
+    -   Speech Recognition (using Whisper) + Speech Synthesis [WORK IN PROGRESS]
 ![](software/Images/Main.PNG)
 ![](software/Images/Main1.PNG)	
     
